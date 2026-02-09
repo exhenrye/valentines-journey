@@ -12,215 +12,98 @@
 <body>
   <!-- Title Screen -->
   <div id="title-screen" class="screen active">
-    <div class="sparkles" aria-hidden="true"></div>
+    <div class="title-bg"></div>
     <div class="title-content">
-      <div class="hearts-float">
-        <span class="heart h1">&#10084;</span>
-        <span class="heart h2">&#10084;</span>
-        <span class="heart h3">&#10084;</span>
+      <div class="title-hearts">
+        <span class="th th1">❤</span>
+        <span class="th th2">❤</span>
       </div>
       <h1>Our Journey</h1>
       <p class="subtitle">A love story across continents</p>
-      <button id="start-btn" class="btn-primary">Begin</button>
+      <button id="start-btn" class="btn-start">Begin Our Story</button>
+      <p class="controls-hint">Use arrow keys or tap to move</p>
     </div>
   </div>
 
-  <!-- Journey Path Screen -->
-  <div id="path-screen" class="screen">
-    <header class="path-header">
-      <h2>Our Journey</h2>
-      <button id="music-toggle" class="music-btn" aria-label="Toggle music">
-        <span class="music-icon">&#9834;</span>
-      </button>
-    </header>
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <!-- Music Toggle -->
+    <button id="music-toggle" class="music-btn" aria-label="Toggle music">
+      <span class="music-icon">♪</span>
+    </button>
 
-    <div class="path-container">
-      <div class="journey-path">
-        <!-- The winding path SVG -->
-        <svg class="path-line" viewBox="0 0 300 1400" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#e8b4b8;stop-opacity:0.3"/>
-              <stop offset="100%" style="stop-color:#d4a5a5;stop-opacity:0.6"/>
-            </linearGradient>
-            <linearGradient id="pathFill" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#e57373"/>
-              <stop offset="100%" style="stop-color:#c94c4c"/>
-            </linearGradient>
-          </defs>
-          <!-- Background path -->
-          <path class="path-bg" d="M150,50 Q250,100 150,150 Q50,200 150,250 Q250,300 150,350 Q50,400 150,450 Q250,500 150,550 Q50,600 150,650 Q250,700 150,750 Q50,800 150,850 Q250,900 150,950 Q50,1000 150,1050 Q250,1100 150,1150 Q50,1200 150,1250 Q250,1300 150,1350"
-                fill="none" stroke="url(#pathGradient)" stroke-width="8" stroke-linecap="round"/>
-          <!-- Filled path (progress) -->
-          <path id="path-progress" class="path-filled" d="M150,50 Q250,100 150,150 Q50,200 150,250 Q250,300 150,350 Q50,400 150,450 Q250,500 150,550 Q50,600 150,650 Q250,700 150,750 Q50,800 150,850 Q250,900 150,950 Q50,1000 150,1050 Q250,1100 150,1150 Q50,1200 150,1250 Q250,1300 150,1350"
-                fill="none" stroke="url(#pathFill)" stroke-width="8" stroke-linecap="round" stroke-dasharray="2000" stroke-dashoffset="2000"/>
-        </svg>
+    <!-- World Container -->
+    <div id="world" class="world">
+      <!-- Parallax Background Layers -->
+      <div class="parallax-layer sky"></div>
+      <div class="parallax-layer far"></div>
+      <div class="parallax-layer mid"></div>
+      <div class="parallax-layer near"></div>
 
-        <!-- Memory Stations -->
-        <div class="stations">
-          <div class="station" data-station="1" style="top: 30px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#127801;</span>
-              <span class="station-number">1</span>
-            </div>
-            <span class="station-label">Madrid</span>
-          </div>
+      <!-- Ground -->
+      <div class="ground"></div>
 
-          <div class="station locked" data-station="2" style="top: 130px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#127984;</span>
-              <span class="station-number">2</span>
-            </div>
-            <span class="station-label">Granada</span>
-          </div>
+      <!-- Scene Decorations (added dynamically) -->
+      <div id="decorations" class="decorations"></div>
 
-          <div class="station locked" data-station="3" style="top: 230px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#9992;</span>
-              <span class="station-number">3</span>
-            </div>
-            <span class="station-label">Leavenworth</span>
-          </div>
+      <!-- Milestone Markers -->
+      <div id="milestones" class="milestones"></div>
 
-          <div class="station locked" data-station="4" style="top: 330px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#9968;</span>
-              <span class="station-number">4</span>
-            </div>
-            <span class="station-label">Geneva</span>
-          </div>
-
-          <div class="station locked" data-station="5" style="top: 430px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#128054;</span>
-              <span class="station-number">5</span>
-            </div>
-            <span class="station-label">Totoro</span>
-          </div>
-
-          <div class="station locked" data-station="6" style="top: 530px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#127968;</span>
-              <span class="station-number">6</span>
-            </div>
-            <span class="station-label">Route de Chêne</span>
-          </div>
-
-          <div class="station locked" data-station="7" style="top: 630px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#128141;</span>
-              <span class="station-number">7</span>
-            </div>
-            <span class="station-label">The Proposal</span>
-          </div>
-
-          <div class="station locked" data-station="8" style="top: 730px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#128146;</span>
-              <span class="station-number">8</span>
-            </div>
-            <span class="station-label">Pignora</span>
-          </div>
-
-          <div class="station locked" data-station="9" style="top: 830px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#127794;</span>
-              <span class="station-number">9</span>
-            </div>
-            <span class="station-label">Seattle</span>
-          </div>
-
-          <div class="station locked" data-station="10" style="top: 930px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#127969;</span>
-              <span class="station-number">10</span>
-            </div>
-            <span class="station-label">Matthews Beach</span>
-          </div>
-
-          <div class="station locked" data-station="11" style="top: 1030px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#128118;</span>
-              <span class="station-number">11</span>
-            </div>
-            <span class="station-label">Theo</span>
-          </div>
-
-          <div class="station locked" data-station="12" style="top: 1130px; left: 50%;">
-            <div class="station-marker">
-              <span class="station-icon">&#10024;</span>
-              <span class="station-number">12</span>
-            </div>
-            <span class="station-label">2026 & Beyond</span>
-          </div>
+      <!-- Character -->
+      <div id="character" class="character">
+        <div class="char-body">
+          <span class="heart heart-1">❤</span>
+          <span class="heart heart-2" style="display:none;">❤</span>
+          <span class="heart heart-baby" style="display:none;">💗</span>
         </div>
       </div>
     </div>
 
-    <footer class="path-footer">
-      <p class="hint">Tap a memory to relive the moment</p>
-    </footer>
-  </div>
-
-  <!-- Memory Modal -->
-  <div id="memory-modal" class="modal">
-    <div class="modal-content">
-      <button class="close-btn" aria-label="Close">&times;</button>
-
-      <div class="modal-header">
-        <span id="modal-icon" class="modal-icon">&#127801;</span>
-        <h3 id="modal-title">Madrid</h3>
-        <p id="modal-date" class="modal-date">October 20, 2017</p>
-      </div>
-
-      <div class="photo-gallery">
-        <div id="photo-container" class="photo-container">
-          <div class="photo-placeholder">&#10084;</div>
+    <!-- Moment Overlay -->
+    <div id="moment-overlay" class="moment-overlay">
+      <div class="moment-content">
+        <h2 id="moment-title" class="moment-title">Madrid</h2>
+        <p id="moment-date" class="moment-date">October 20, 2017</p>
+        <div id="moment-photo" class="moment-photo">
+          <div class="photo-placeholder">❤</div>
         </div>
-        <div class="gallery-nav" id="gallery-nav">
-          <button id="prev-photo" class="nav-btn" aria-label="Previous">&#8249;</button>
-          <div id="photo-dots" class="photo-dots"></div>
-          <button id="next-photo" class="nav-btn" aria-label="Next">&#8250;</button>
-        </div>
+        <p id="moment-caption" class="moment-caption"></p>
+        <button id="moment-continue" class="btn-continue">Continue →</button>
       </div>
+    </div>
 
-      <p id="modal-caption" class="modal-caption">
-        Your phone died. We almost didn't find each other...
-      </p>
-
-      <button id="continue-btn" class="btn-primary">Continue Journey</button>
+    <!-- Progress Indicator -->
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
     </div>
   </div>
 
   <!-- Finale Screen -->
   <div id="finale-screen" class="screen">
-    <div class="sparkles" aria-hidden="true"></div>
+    <div class="finale-bg"></div>
     <div class="finale-content">
-      <div class="hearts-burst">
-        <span class="heart b1">&#10084;</span>
-        <span class="heart b2">&#10084;</span>
-        <span class="heart b3">&#10084;</span>
-        <span class="heart b4">&#10084;</span>
-        <span class="heart b5">&#10084;</span>
-        <span class="heart b6">&#10084;</span>
-        <span class="heart b7">&#10084;</span>
+      <div class="finale-hearts">
+        <span class="fh">❤</span>
+        <span class="fh">❤</span>
+        <span class="fh small">💗</span>
       </div>
       <h2>Happy Valentine's Day</h2>
-      <p id="finale-message" class="finale-message">
-        From a dead phone in Madrid to a baby boy in Seattle. From thigh-high boots to 3am feedings. You took a chance on a guy from Tinder, and I've spent every day since trying to deserve you.
-        <br><br>
-        Eight years, twelve places, three countries, and one perfect little family.
-        <br><br>
-        Thank you for choosing me, for choosing us, for building this beautiful life together.
-        <br><br>
-        I love you more than words. Ti amo per sempre.
-      </p>
+      <h3>Elora</h3>
+      <div id="finale-message" class="finale-message">
+        <p>From a dead phone in Madrid to a baby boy in Seattle.</p>
+        <p>From thigh-high boots to 3am feedings.</p>
+        <p>You took a chance on a guy from Tinder, and I've spent every day since trying to deserve you.</p>
+        <p>Eight years, twelve places, three countries, and one perfect little family.</p>
+        <p>Thank you for choosing me, for choosing us, for building this beautiful life together.</p>
+        <p>I love you more than words.</p>
+        <p class="italian">Ti amo per sempre.</p>
+      </div>
       <p class="signature">With all my love,<br><span class="name">Enea</span></p>
-      <button id="restart-btn" class="btn-secondary">Relive Our Journey</button>
+      <button id="restart-btn" class="btn-restart">Relive Our Journey</button>
     </div>
   </div>
 
-  <!-- Background music -->
+  <!-- Audio -->
   <audio id="bg-music" loop preload="none">
     <source src="assets/music/background.mp3" type="audio/mpeg">
   </audio>
