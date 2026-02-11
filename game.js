@@ -334,6 +334,11 @@ class BootScene extends Phaser.Scene {
       loadingText.destroy();
     });
 
+    // Log any failed assets
+    this.load.on('loaderror', (file) => {
+      console.error('LOAD FAILED:', file.key, file.url);
+    });
+
     // Load character sprites
     this.load.spritesheet('male', 'assets/chars/male.png', {
       frameWidth: 100,
@@ -2266,6 +2271,25 @@ class GameScene extends Phaser.Scene {
     this.bgLayers.forEach(layer => {
       layer.sprite.tilePositionX += layer.speed * 0.02;
     });
+
+    // Debug overlay - shows character state every frame
+    if (!this.debugText) {
+      this.debugText = this.add.text(10, 10, '', {
+        fontSize: '11px', color: '#00ff00', backgroundColor: '#000000cc',
+        padding: { x: 6, y: 4 }, wordWrap: { width: 500 }
+      }).setDepth(999).setScrollFactor(0);
+    }
+    const e = this.enea;
+    const el = this.elora;
+    const maleTexOk = this.textures.exists('male');
+    const femaleTexOk = this.textures.exists('female');
+    this.debugText.setText(
+      `EP${EPISODES[this.currentEpisode]?.id || '?'} | DI:${this.dialogueIndex} | Anim:${this.isAnimating}\n` +
+      `Enea:  vis=${e.visible} a=${e.alpha.toFixed(1)} pos=(${Math.round(e.x)},${Math.round(e.y)}) ` +
+      `sc=${e.scale.toFixed(1)} dp=${e.depth} tex=${maleTexOk}\n` +
+      `Elora: vis=${el.visible} a=${el.alpha.toFixed(1)} pos=(${Math.round(el.x)},${Math.round(el.y)}) ` +
+      `sc=${el.scale.toFixed(1)} dp=${el.depth} tex=${femaleTexOk}`
+    );
   }
 }
 
