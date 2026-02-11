@@ -1587,25 +1587,6 @@ class GameScene extends Phaser.Scene {
     this.elora.setDepth(100);   // Behind table (110)
     this.eloraExpectedX = eloraDinnerX;
 
-    // Debug markers
-    const debug = this.add.graphics().setDepth(250);
-    debug.fillStyle(0x00ff00, 0.8);
-    debug.fillCircle(eneaDinnerX, seatY, 5);
-    debug.fillCircle(eloraDinnerX, seatY, 5);
-    // Blue dots at character heads
-    debug.fillStyle(0x0088ff, 0.8);
-    debug.fillCircle(eneaDinnerX, seatY - spriteH, 5);
-    debug.fillCircle(eloraDinnerX, seatY - spriteH, 5);
-    // Red line for table surface
-    debug.lineStyle(2, 0xff0000, 0.8);
-    debug.lineBetween(tableX - tableW / 2, tableTopY, tableX + tableW / 2, tableTopY);
-    add(debug);
-    add(this.add.text(10, h - 80,
-      `Scale: ${dinnerScale} | SpriteH: ${spriteH}px | Table Y: ${tableTopY} | Seat Y: ${seatY}\n` +
-      `Enea: (${eneaDinnerX}, ${seatY}) head@${seatY - spriteH} | Elora: (${eloraDinnerX}, ${seatY}) head@${seatY - spriteH}\n` +
-      `Visible above table: ${seatY - spriteH} to ${tableTopY} = ${tableTopY - (seatY - spriteH)}px`,
-      { fontSize: '11px', color: '#00ff00', backgroundColor: '#000000aa', padding: { x: 8, y: 4 } }
-    ).setDepth(250));
   }
 
   cleanupRestaurant() {
@@ -2281,24 +2262,6 @@ class GameScene extends Phaser.Scene {
       layer.sprite.tilePositionX += layer.speed * 0.02;
     });
 
-    // Debug overlay - shows character state every frame
-    if (!this.debugText) {
-      this.debugText = this.add.text(10, 10, '', {
-        fontSize: '11px', color: '#00ff00', backgroundColor: '#000000cc',
-        padding: { x: 6, y: 4 }, wordWrap: { width: 500 }
-      }).setDepth(999).setScrollFactor(0);
-    }
-    const e = this.enea;
-    const el = this.elora;
-    const maleTexOk = this.textures.exists('male');
-    const femaleTexOk = this.textures.exists('female');
-    this.debugText.setText(
-      `EP${EPISODES[this.currentEpisode]?.id || '?'} | DI:${this.dialogueIndex} | Anim:${this.isAnimating}\n` +
-      `Enea:  vis=${e.visible} a=${e.alpha.toFixed(1)} pos=(${Math.round(e.x)},${Math.round(e.y)}) ` +
-      `sc=${e.scale.toFixed(1)} dp=${e.depth} tex=${maleTexOk}\n` +
-      `Elora: vis=${el.visible} a=${el.alpha.toFixed(1)} pos=(${Math.round(el.x)},${Math.round(el.y)}) ` +
-      `sc=${el.scale.toFixed(1)} dp=${el.depth} tex=${femaleTexOk}`
-    );
   }
 }
 
