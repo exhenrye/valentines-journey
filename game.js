@@ -1319,6 +1319,8 @@ class GameScene extends Phaser.Scene {
         break;
 
       case 'restaurant-scene':
+        // Kill any active tweens (e.g. walkTogether) before restaurant setup
+        this.tweens.killAll();
         // Transition to restaurant interior
         this.setupRestaurant();
         this.isAnimating = false;
@@ -2033,8 +2035,8 @@ class GameScene extends Phaser.Scene {
 
       // Show/hide navigation based on photo count
       const hasMultiple = this.currentPhotos.length > 1;
-      this.prevPhotoBtn.setVisible(hasMultiple);
-      this.nextPhotoBtn.setVisible(hasMultiple);
+      this.prevPhotoBtn.setVisible(false); // Always hidden on first photo
+      this.nextPhotoBtn.setVisible(hasMultiple); // Show only if more photos ahead
       this.photoCounter.setVisible(hasMultiple);
     } else {
       // No photos - show icon instead
@@ -2095,17 +2097,25 @@ class GameScene extends Phaser.Scene {
 
     // Update counter
     this.photoCounter.setText(`${this.currentPhotoIndex + 1} / ${this.currentPhotos.length}`);
+
+    // Show/hide arrows based on position in slideshow
+    if (this.currentPhotos.length > 1) {
+      this.prevPhotoBtn.setVisible(this.currentPhotoIndex > 0);
+      this.nextPhotoBtn.setVisible(this.currentPhotoIndex < this.currentPhotos.length - 1);
+    }
   }
 
   showNextPhoto() {
     if (this.currentPhotos.length === 0) return;
-    this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.currentPhotos.length;
+    if (this.currentPhotoIndex >= this.currentPhotos.length - 1) return; // Don't cycle past last
+    this.currentPhotoIndex++;
     this.displayCurrentPhoto();
   }
 
   showPrevPhoto() {
     if (this.currentPhotos.length === 0) return;
-    this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.currentPhotos.length) % this.currentPhotos.length;
+    if (this.currentPhotoIndex <= 0) return; // Don't cycle past first
+    this.currentPhotoIndex--;
     this.displayCurrentPhoto();
   }
 
@@ -2157,13 +2167,12 @@ class GameScene extends Phaser.Scene {
         this._photoClickHandled = false;
         return;
       }
+      // Global clicks advance through photos but NEVER close the overlay
+      // Only the Continue button closes
       if (this.currentPhotos.length > 1 && this.currentPhotoIndex < this.currentPhotos.length - 1) {
-        // More photos to show - advance to next
         this.showNextPhoto();
-      } else {
-        // Last photo (or no photos / single photo) - close overlay
-        this.closePhoto();
       }
+      // On last photo, do nothing — user must click Continue
       return;
     }
 
