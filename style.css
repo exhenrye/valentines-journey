@@ -40,7 +40,7 @@ h1, h2, h3 {
 }
 
 .screen.active {
-  display: block;
+  display: flex;
   opacity: 1;
 }
 
@@ -55,6 +55,7 @@ h1, h2, h3 {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  pointer-events: none;
 }
 
 .title-bg::before {
@@ -133,8 +134,13 @@ h1, h2, h3 {
 
 /* ===== Game Screen ===== */
 #game-screen {
+  display: block;
   background: #000;
   overflow: hidden;
+}
+
+#game-screen.active {
+  display: block;
 }
 
 .music-btn {

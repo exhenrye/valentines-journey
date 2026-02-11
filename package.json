@@ -1,0 +1,15 @@
+{
+  "name": "valentines-journey",
+  "version": "1.0.0",
+  "description": "A Valentine's Day game built with Phaser 3",
+  "scripts": {
+    "test": "jest",
+    "test:data": "jest tests/data.test.js tests/actions.test.js",
+    "test:integration": "playwright test",
+    "serve": "npx http-server -p 8080 -c-1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@playwright/test": "^1.41.0"
+  }
+}

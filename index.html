@@ -4,110 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Our Journey</title>
-  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
 </head>
 <body>
-  <!-- Title Screen -->
-  <div id="title-screen" class="screen active">
-    <div class="title-bg"></div>
-    <div class="title-content">
-      <div class="title-hearts">
-        <span class="th th1">❤</span>
-        <span class="th th2">❤</span>
-      </div>
-      <h1>Our Journey</h1>
-      <p class="subtitle">A love story across continents</p>
-      <button id="start-btn" class="btn-start">Begin Our Story</button>
-      <p class="controls-hint">Use arrow keys or tap to move</p>
-    </div>
-  </div>
-
-  <!-- Game Screen -->
-  <div id="game-screen" class="screen">
-    <!-- Music Toggle -->
-    <button id="music-toggle" class="music-btn" aria-label="Toggle music">
-      <span class="music-icon">♪</span>
-    </button>
-
-    <!-- World Container -->
-    <div id="world" class="world">
-      <!-- Parallax Background Layers -->
-      <div class="parallax-layer sky"></div>
-      <div class="parallax-layer far"></div>
-      <div class="parallax-layer mid"></div>
-      <div class="parallax-layer near"></div>
-
-      <!-- Ground -->
-      <div class="ground"></div>
-
-      <!-- Scene Decorations (added dynamically) -->
-      <div id="decorations" class="decorations"></div>
-
-      <!-- Milestone Markers -->
-      <div id="milestones" class="milestones"></div>
-
-      <!-- Character -->
-      <div id="character" class="character">
-        <div class="char-body">
-          <span class="heart heart-1">❤</span>
-          <span class="heart heart-2" style="display:none;">❤</span>
-          <span class="heart heart-baby" style="display:none;">💗</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Moment Overlay -->
-    <div id="moment-overlay" class="moment-overlay">
-      <div class="moment-content">
-        <h2 id="moment-title" class="moment-title">Madrid</h2>
-        <p id="moment-date" class="moment-date">October 20, 2017</p>
-        <div id="moment-photo" class="moment-photo">
-          <div class="photo-placeholder">❤</div>
-        </div>
-        <p id="moment-caption" class="moment-caption"></p>
-        <button id="moment-continue" class="btn-continue">Continue →</button>
-      </div>
-    </div>
-
-    <!-- Progress Indicator -->
-    <div class="progress-bar">
-      <div id="progress-fill" class="progress-fill"></div>
-    </div>
-  </div>
-
-  <!-- Finale Screen -->
-  <div id="finale-screen" class="screen">
-    <div class="finale-bg"></div>
-    <div class="finale-content">
-      <div class="finale-hearts">
-        <span class="fh">❤</span>
-        <span class="fh">❤</span>
-        <span class="fh small">💗</span>
-      </div>
-      <h2>Happy Valentine's Day</h2>
-      <h3>Elora</h3>
-      <div id="finale-message" class="finale-message">
-        <p>From a dead phone in Madrid to a baby boy in Seattle.</p>
-        <p>From thigh-high boots to 3am feedings.</p>
-        <p>You took a chance on a guy from Tinder, and I've spent every day since trying to deserve you.</p>
-        <p>Eight years, twelve places, three countries, and one perfect little family.</p>
-        <p>Thank you for choosing me, for choosing us, for building this beautiful life together.</p>
-        <p>I love you more than words.</p>
-        <p class="italian">Ti amo per sempre.</p>
-      </div>
-      <p class="signature">With all my love,<br><span class="name">Enea</span></p>
-      <button id="restart-btn" class="btn-restart">Relive Our Journey</button>
-    </div>
-  </div>
-
-  <!-- Audio -->
-  <audio id="bg-music" loop preload="none">
-    <source src="assets/music/background.mp3" type="audio/mpeg">
-  </audio>
-
+  <div id="game-container"></div>
   <script src="game.js"></script>
 </body>
 </html>
