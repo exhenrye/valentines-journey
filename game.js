@@ -806,7 +806,7 @@ class GameScene extends Phaser.Scene {
     this.heartsContainer = this.add.container(0, 0);
 
     // Photo moment overlay
-    this.photoOverlay = this.add.container(0, 0);
+    this.photoOverlay = this.add.container(0, 0).setDepth(300);
     this.photoOverlay.setVisible(false);
     this.currentPhotoIndex = 0;
     this.currentPhotos = [];
@@ -883,6 +883,17 @@ class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.keyboard.on('keydown-ENTER', () => this.handleInput());
 
+    // Debug overlay toggle (press D to show/hide)
+    this.debugEnabled = false;
+    this.debugText = this.add.text(10, 10, '', {
+      fontSize: '11px', color: '#00ff00', backgroundColor: '#000000cc',
+      padding: { x: 6, y: 4 }, wordWrap: { width: 500 }
+    }).setDepth(999).setScrollFactor(0).setVisible(false);
+    this.input.keyboard.on('keydown-D', () => {
+      this.debugEnabled = !this.debugEnabled;
+      this.debugText.setVisible(this.debugEnabled);
+    });
+
     // Fade in and start episode
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.startEpisode();
@@ -955,6 +966,9 @@ class GameScene extends Phaser.Scene {
 
     this.baby.setVisible(false);
 
+    // Block input during location card display
+    this.isAnimating = true;
+
     // Show location card
     this.locationTitle.setText(episode.name);
     this.locationDate.setText(episode.date);
@@ -973,6 +987,7 @@ class GameScene extends Phaser.Scene {
             duration: 500,
             onComplete: () => {
               this.locationCard.setVisible(false);
+              this.isAnimating = false;
               this.processDialogue();
             }
           });
@@ -2262,6 +2277,19 @@ class GameScene extends Phaser.Scene {
       layer.sprite.tilePositionX += layer.speed * 0.02;
     });
 
+    // Debug overlay (toggle with D key)
+    if (this.debugEnabled && this.debugText) {
+      const e = this.enea;
+      const el = this.elora;
+      this.debugText.setText(
+        `EP${EPISODES[this.currentEpisode]?.id || '?'} | DI:${this.dialogueIndex} | Anim:${this.isAnimating}\n` +
+        `Enea:  vis=${e.visible} a=${e.alpha.toFixed(1)} pos=(${Math.round(e.x)},${Math.round(e.y)}) ` +
+        `sc=${e.scale.toFixed(1)} dp=${e.depth}\n` +
+        `Elora: vis=${el.visible} a=${el.alpha.toFixed(1)} pos=(${Math.round(el.x)},${Math.round(el.y)}) ` +
+        `sc=${el.scale.toFixed(1)} dp=${el.depth}\n` +
+        `Photo: ${this.photoOverlay.visible ? 'OPEN' : 'closed'} | Restaurant: ${this.restaurantElements ? 'active' : 'none'}`
+      );
+    }
   }
 }
 
