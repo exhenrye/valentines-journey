@@ -441,6 +441,16 @@ class BootScene extends Phaser.Scene {
     this.load.image('window-front', 'assets/backgrounds/interior/House/Window_Front.png');
     this.load.image('mug', 'assets/backgrounds/interior/Furniture/Mug.png');
 
+    // Restaurant tileset (Riley's pack) - silverware and furniture
+    this.load.spritesheet('silverware', 'assets/restaurant-tileset/Spritesheets/Silverware.png', {
+      frameWidth: 32, frameHeight: 32
+    });
+    // Silverware frames: 0=fork, 1=spoon, 2=knife, 3=small plate, 4=plate, 5=bowl, 6=napkin dark, 7=napkin folded, 8=small item
+    this.load.spritesheet('rest-furniture', 'assets/restaurant-tileset/Spritesheets/Furniture.png', {
+      frameWidth: 32, frameHeight: 32
+    });
+    // Furniture frames: 0=stool, 1=table, 2=chair, 3=door
+
     // Load episode photos dynamically
     EPISODES.forEach(episode => {
       if (episode.photos) {
@@ -1649,44 +1659,31 @@ class GameScene extends Phaser.Scene {
       duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
     });
 
-    // Plates
-    const plateGfx = this.add.graphics().setDepth(112);
-    [-90, 90].forEach(off => {
-      plateGfx.fillStyle(0xeeeeee, 0.8);
-      plateGfx.fillCircle(tableX + off, tableTopY + 7, 15);
-      plateGfx.lineStyle(1, 0xcccccc, 0.6);
-      plateGfx.strokeCircle(tableX + off, tableTopY + 7, 15);
-    });
-    add(plateGfx);
+    // Plates (silverware frame 4 = plate)
+    const plateScale = 3;
+    add(this.add.sprite(tableX - 90, tableTopY + 4, 'silverware', 4)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(112));
+    add(this.add.sprite(tableX + 90, tableTopY + 4, 'silverware', 4)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(112));
 
-    // Mugs on table
-    add(this.add.image(tableX - 55, tableTopY, 'mug')
-      .setScale(S * 0.5).setOrigin(0.5, 1).setDepth(112));
-    add(this.add.image(tableX + 55, tableTopY, 'mug')
-      .setScale(S * 0.5).setOrigin(0.5, 1).setDepth(112).setFlipX(true));
+    // Enea's cutlery (static, left side)
+    add(this.add.sprite(tableX - 120, tableTopY - 2, 'silverware', 0)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113)); // fork
+    add(this.add.sprite(tableX - 60, tableTopY - 2, 'silverware', 2)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113)); // knife
 
-    // Cutlery near Elora's plate (drawn with graphics for cleaner look)
-    const cutleryGfx = this.add.graphics().setDepth(113);
-    // Fork (right of Elora's plate)
-    cutleryGfx.lineStyle(2, 0xcccccc, 0.9);
-    const forkX = tableX + 112;
-    cutleryGfx.lineBetween(forkX, tableTopY - 2, forkX, tableTopY + 14);
-    cutleryGfx.lineBetween(forkX - 3, tableTopY - 2, forkX - 3, tableTopY + 4);
-    cutleryGfx.lineBetween(forkX + 3, tableTopY - 2, forkX + 3, tableTopY + 4);
-    // Knife (left of Elora's plate)
-    const knifeX = tableX + 68;
-    cutleryGfx.lineStyle(2, 0xdddddd, 0.9);
-    cutleryGfx.lineBetween(knifeX, tableTopY - 2, knifeX, tableTopY + 14);
-    cutleryGfx.lineStyle(3, 0xcccccc, 0.7);
-    cutleryGfx.lineBetween(knifeX, tableTopY - 2, knifeX + 2, tableTopY + 5);
-    add(cutleryGfx);
-    // Napkin (small white square near Elora)
-    const napkin = this.add.rectangle(tableX + 130, tableTopY + 4, 16, 12, 0xffffff, 0.7)
-      .setDepth(113).setAngle(8);
-    add(napkin);
-    // Store references for flying animation
-    this.eloraCutleryFork = cutleryGfx;
-    this.eloraCutleryKnife = napkin; // Reuse knife ref for napkin (main flying object)
+    // Elora's cutlery (will fly away during embarrassed effect)
+    this.eloraCutleryFork = this.add.sprite(tableX + 115, tableTopY - 2, 'silverware', 0)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
+    this.eloraCutleryKnife = this.add.sprite(tableX + 65, tableTopY - 2, 'silverware', 2)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
+    add(this.eloraCutleryFork);
+    add(this.eloraCutleryKnife);
+
+    // Napkin near Elora's plate (frame 7 = folded napkin)
+    this.eloraNapkin = this.add.sprite(tableX + 140, tableTopY + 2, 'silverware', 7)
+      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
+    add(this.eloraNapkin);
 
     // Warm ambient overlay (entire scene)
     add(this.add.rectangle(w / 2, h / 2, w, h, 0x331500, 0.08).setDepth(-80));
@@ -1727,6 +1724,7 @@ class GameScene extends Phaser.Scene {
     if (this.elora) { this.elora.setDepth(100); this.elora.setScale(3); }
     this.eloraCutleryFork = null;
     this.eloraCutleryKnife = null;
+    this.eloraNapkin = null;
   }
 
   walkTogether(callback) {
@@ -2054,53 +2052,49 @@ class GameScene extends Phaser.Scene {
       repeat: 3
     });
 
-    // === FLYING NAPKIN + CUTLERY from the table ===
+    // === FLYING CUTLERY + NAPKIN from the table ===
     if (this.eloraCutleryFork && this.eloraCutleryKnife) {
-      // Hide the static cutlery graphics
-      this.eloraCutleryFork.setAlpha(0);
-
-      // Napkin flies up and tumbles (the stored rectangle)
+      // Fork flies up-right with spin
+      this.eloraCutleryFork.setDepth(150);
       this.tweens.add({
-        targets: this.eloraCutleryKnife,
-        x: this.eloraCutleryKnife.x + 80,
-        y: this.eloraCutleryKnife.y - 180,
-        angle: 360 * 3,
-        alpha: 0,
-        scaleX: 1.5,
-        scaleY: 1.5,
-        duration: 1200,
-        ease: 'Sine.easeOut',
-        onComplete: () => this.eloraCutleryKnife.destroy()
-      });
-
-      // Create flying fork (drawn rectangle for clean look)
-      const flyFork = this.add.rectangle(eloraX + 30, eloraY - 80, 4, 20, 0xcccccc)
-        .setDepth(150);
-      this.tweens.add({
-        targets: flyFork,
-        x: flyFork.x + 140,
-        y: flyFork.y - 220,
+        targets: this.eloraCutleryFork,
+        x: this.eloraCutleryFork.x + 140,
+        y: this.eloraCutleryFork.y - 220,
         angle: 360 * 4,
         alpha: 0,
         duration: 1000,
-        ease: 'Sine.easeOut',
-        onComplete: () => flyFork.destroy()
+        ease: 'Sine.easeOut'
       });
 
-      // Create flying knife
-      const flyKnife = this.add.rectangle(eloraX - 10, eloraY - 70, 3, 18, 0xdddddd)
-        .setDepth(150);
+      // Knife flies up-left with spin
+      this.eloraCutleryKnife.setDepth(150);
       this.tweens.add({
-        targets: flyKnife,
-        x: flyKnife.x - 100,
-        y: flyKnife.y - 180,
+        targets: this.eloraCutleryKnife,
+        x: this.eloraCutleryKnife.x - 100,
+        y: this.eloraCutleryKnife.y - 180,
         angle: -360 * 3,
         alpha: 0,
         duration: 900,
         delay: 100,
-        ease: 'Sine.easeOut',
-        onComplete: () => flyKnife.destroy()
+        ease: 'Sine.easeOut'
       });
+
+      // Napkin tumbles away
+      if (this.eloraNapkin) {
+        this.eloraNapkin.setDepth(150);
+        this.tweens.add({
+          targets: this.eloraNapkin,
+          x: this.eloraNapkin.x + 80,
+          y: this.eloraNapkin.y - 160,
+          angle: 360 * 3,
+          alpha: 0,
+          scaleX: 5,
+          scaleY: 5,
+          duration: 1200,
+          delay: 50,
+          ease: 'Sine.easeOut'
+        });
+      }
     }
   }
 
