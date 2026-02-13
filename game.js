@@ -68,7 +68,7 @@ const EPISODES = [
     id: 3,
     name: "Leavenworth",
     date: "October 2018",
-    background: "town-sunset",
+    background: "christmas-night",
     icon: "✈️",
     caption: "We were an ocean apart. On our anniversary, I surprised you—flew across the world just to see your face. Every mile was worth it.",
     dialogue: [
@@ -296,6 +296,16 @@ const BACKGROUNDS = {
       { key: 'purple3', speed: 0.6 },
       { key: 'purple4', speed: 1.0 }
     ]
+  },
+  'christmas-night': {
+    layers: [
+      { key: 'xmas1', speed: 0.05 },
+      { key: 'xmas3', speed: 0.15 },
+      { key: 'xmas5', speed: 0.3 },
+      { key: 'xmas7', speed: 0.55 },
+      { key: 'xmas9', speed: 0.8 },
+      { key: 'xmas10', speed: 1.0 }
+    ]
   }
 };
 
@@ -378,6 +388,15 @@ class BootScene extends Phaser.Scene {
     this.load.image('town-night5', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer05.png');
     this.load.image('town-night7', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer07.png');
     this.load.image('town-night9', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer09.png');
+
+    // Load christmas-night backgrounds (for Leavenworth)
+    const xmasBase = 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Christmas Night/';
+    this.load.image('xmas1', xmasBase + 'PixelTown_Christmasnight_layer01.png');
+    this.load.image('xmas3', xmasBase + 'PixelTown_Christmasnight_layer03.png');
+    this.load.image('xmas5', xmasBase + 'PixelTown_Christmasnight_layer05.png');
+    this.load.image('xmas7', xmasBase + 'PixelTown_Christmasnight_layer07.png');
+    this.load.image('xmas9', xmasBase + 'PixelTown_Christmasnight_layer09.png');
+    this.load.image('xmas10', xmasBase + 'PixelTown_Christmasnight_layer10.png');
 
     // Load mountain backgrounds
     this.load.image('mtn-sky', 'assets/backgrounds/mountains-dusk/sky.png');
