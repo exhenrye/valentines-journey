@@ -11,6 +11,7 @@ const EPISODES = [
     date: "October 20, 2017",
     background: "town-night",
     icon: "🌹",
+    tints: { enea: 0xccccff, elora: 0xffd4e8 }, // Cool evening tones / cream dress
     caption: "Your phone died. We almost didn't find each other. But somehow, in the crowd of Serrano, we did. Thigh-high boots, a cream dress, and the most beautiful woman I'd ever seen.",
     noPhoto: true,
     dialogue: [
@@ -36,6 +37,7 @@ const EPISODES = [
     date: "December 21-23, 2017",
     background: "town-sunset",
     icon: "🏰",
+    tints: { enea: 0xddd8c8, elora: 0xffccaa }, // Warm travel casual
     caption: "Our first real adventure together. Wandering the Alhambra, getting lost in narrow streets, realizing I never wanted to travel without you again.",
     photos: [
       'assets/photos/02-granada/kiss-selfie.jpg',
@@ -70,6 +72,7 @@ const EPISODES = [
     date: "October 2018",
     background: "christmas-night",
     icon: "✈️",
+    tints: { enea: 0xaabbcc, elora: 0xeeccdd }, // Winter layers
     caption: "We were an ocean apart. On our anniversary, I surprised you—flew across the world just to see your face. Every mile was worth it.",
     dialogue: [
       { speaker: 'elora', text: "I miss him so much today...", action: 'elora-alone' },
@@ -973,12 +976,21 @@ class GameScene extends Phaser.Scene {
     this.enea.setPosition(this.width * 0.5, this.groundY);
     this.enea.stop();
     this.enea.setFrame(0);
-    this.enea.setScale(3); // Reset scale (kneeling changes it)
+    this.enea.setScale(3); // Reset scale (restaurant changes it)
 
     this.elora.setVisible(false);
     this.elora.setPosition(this.width * 0.5, this.groundY);
     this.elora.stop();
     this.elora.setFrame(0);
+
+    // Apply episode-specific tints for outfit differentiation
+    if (episode.tints) {
+      this.enea.setTint(episode.tints.enea);
+      this.elora.setTint(episode.tints.elora);
+    } else {
+      this.enea.clearTint();
+      this.elora.clearTint();
+    }
 
     this.dog.setVisible(false);
     this.dog.setPosition(this.width * 0.2, this.groundY);
@@ -1653,25 +1665,38 @@ class GameScene extends Phaser.Scene {
     add(this.add.image(tableX + 55, tableTopY, 'mug')
       .setScale(S * 0.5).setOrigin(0.5, 1).setDepth(112).setFlipX(true));
 
-    // Cutlery near Elora's plate (for embarrassed animation)
-    this.eloraCutleryFork = this.add.text(tableX + 112, tableTopY + 2, '🍴', {
-      fontSize: '14px'
-    }).setOrigin(0.5).setDepth(113);
-    this.eloraCutleryKnife = this.add.text(tableX + 68, tableTopY + 2, '🔪', {
-      fontSize: '12px'
-    }).setOrigin(0.5).setDepth(113);
-    add(this.eloraCutleryFork);
-    add(this.eloraCutleryKnife);
+    // Cutlery near Elora's plate (drawn with graphics for cleaner look)
+    const cutleryGfx = this.add.graphics().setDepth(113);
+    // Fork (right of Elora's plate)
+    cutleryGfx.lineStyle(2, 0xcccccc, 0.9);
+    const forkX = tableX + 112;
+    cutleryGfx.lineBetween(forkX, tableTopY - 2, forkX, tableTopY + 14);
+    cutleryGfx.lineBetween(forkX - 3, tableTopY - 2, forkX - 3, tableTopY + 4);
+    cutleryGfx.lineBetween(forkX + 3, tableTopY - 2, forkX + 3, tableTopY + 4);
+    // Knife (left of Elora's plate)
+    const knifeX = tableX + 68;
+    cutleryGfx.lineStyle(2, 0xdddddd, 0.9);
+    cutleryGfx.lineBetween(knifeX, tableTopY - 2, knifeX, tableTopY + 14);
+    cutleryGfx.lineStyle(3, 0xcccccc, 0.7);
+    cutleryGfx.lineBetween(knifeX, tableTopY - 2, knifeX + 2, tableTopY + 5);
+    add(cutleryGfx);
+    // Napkin (small white square near Elora)
+    const napkin = this.add.rectangle(tableX + 130, tableTopY + 4, 16, 12, 0xffffff, 0.7)
+      .setDepth(113).setAngle(8);
+    add(napkin);
+    // Store references for flying animation
+    this.eloraCutleryFork = cutleryGfx;
+    this.eloraCutleryKnife = napkin; // Reuse knife ref for napkin (main flying object)
 
     // Warm ambient overlay (entire scene)
     add(this.add.rectangle(w / 2, h / 2, w, h, 0x331500, 0.08).setDepth(-80));
 
     // STEP 5: Position characters at the table
-    const dinnerScale = 2.5;
-    const spriteH = 64 * dinnerScale; // 160px
-    const seatY = tableTopY + Math.round(spriteH * 0.35);
-    const eneaDinnerX = tableX - 150;  // Wider spread
-    const eloraDinnerX = tableX + 150;
+    const dinnerScale = 3;
+    const spriteH = 64 * dinnerScale; // 192px
+    const seatY = tableTopY + Math.round(spriteH * 0.38);
+    const eneaDinnerX = tableX - 160;
+    const eloraDinnerX = tableX + 160;
 
     this.enea.setPosition(eneaDinnerX, seatY);
     this.enea.setScale(dinnerScale);
@@ -2029,49 +2054,52 @@ class GameScene extends Phaser.Scene {
       repeat: 3
     });
 
-    // === FLYING CUTLERY from the table ===
-    // If we're in the restaurant scene, animate the cutlery items flying
+    // === FLYING NAPKIN + CUTLERY from the table ===
     if (this.eloraCutleryFork && this.eloraCutleryKnife) {
-      // Fork flies up-right with spin
-      this.tweens.add({
-        targets: this.eloraCutleryFork,
-        x: this.eloraCutleryFork.x + 120,
-        y: this.eloraCutleryFork.y - 200,
-        rotation: Math.PI * 3,
-        alpha: 0,
-        duration: 1000,
-        ease: 'Sine.easeOut',
-        onComplete: () => this.eloraCutleryFork.destroy()
-      });
+      // Hide the static cutlery graphics
+      this.eloraCutleryFork.setAlpha(0);
 
-      // Knife flies up-left with spin (slightly delayed)
+      // Napkin flies up and tumbles (the stored rectangle)
       this.tweens.add({
         targets: this.eloraCutleryKnife,
-        x: this.eloraCutleryKnife.x - 80,
-        y: this.eloraCutleryKnife.y - 160,
-        rotation: -Math.PI * 2.5,
+        x: this.eloraCutleryKnife.x + 80,
+        y: this.eloraCutleryKnife.y - 180,
+        angle: 360 * 3,
         alpha: 0,
-        duration: 900,
-        delay: 100,
+        scaleX: 1.5,
+        scaleY: 1.5,
+        duration: 1200,
         ease: 'Sine.easeOut',
         onComplete: () => this.eloraCutleryKnife.destroy()
       });
 
-      // Create a napkin that also flies
-      const napkin = this.add.text(eloraX + 20, eloraY - 60, '🧻', {
-        fontSize: '20px'
-      }).setOrigin(0.5).setDepth(150);
-
+      // Create flying fork (drawn rectangle for clean look)
+      const flyFork = this.add.rectangle(eloraX + 30, eloraY - 80, 4, 20, 0xcccccc)
+        .setDepth(150);
       this.tweens.add({
-        targets: napkin,
-        x: napkin.x + 60,
-        y: napkin.y - 100,
-        rotation: Math.PI * 2,
+        targets: flyFork,
+        x: flyFork.x + 140,
+        y: flyFork.y - 220,
+        angle: 360 * 4,
         alpha: 0,
-        duration: 1200,
-        delay: 50,
+        duration: 1000,
         ease: 'Sine.easeOut',
-        onComplete: () => napkin.destroy()
+        onComplete: () => flyFork.destroy()
+      });
+
+      // Create flying knife
+      const flyKnife = this.add.rectangle(eloraX - 10, eloraY - 70, 3, 18, 0xdddddd)
+        .setDepth(150);
+      this.tweens.add({
+        targets: flyKnife,
+        x: flyKnife.x - 100,
+        y: flyKnife.y - 180,
+        angle: -360 * 3,
+        alpha: 0,
+        duration: 900,
+        delay: 100,
+        ease: 'Sine.easeOut',
+        onComplete: () => flyKnife.destroy()
       });
     }
   }
@@ -2331,7 +2359,8 @@ class GameScene extends Phaser.Scene {
 
     // Stop all running tweens to prevent callbacks from old episode
     this.tweens.killAll();
-    this.isAnimating = false;
+    // Block input during transition (prevents global handleInput from firing)
+    this.isAnimating = true;
 
     // Hide speech and photo overlays
     this.hideSpeech();
