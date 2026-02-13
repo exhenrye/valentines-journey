@@ -1555,15 +1555,18 @@ class GameScene extends Phaser.Scene {
     const add = (el) => { this.restaurantElements.push(el); return el; };
     const S = 6; // Pixel art scale factor (8px tiles → 48px on screen)
 
+    // Full-screen black background (prevents any gaps)
+    add(this.add.rectangle(w / 2, h / 2, w, h, 0x1a0e08).setDepth(-110));
+
     // STEP 2: Restaurant background using pixel art tiles
-    // Wallpaper - tiled across the wall area (upper 60%)
-    const wallH = h * 0.62;
+    // Wallpaper - tiled across the wall area (upper 65%)
+    const wallH = h * 0.65;
     add(this.add.tileSprite(0, 0, w, wallH, 'wallpaper-tile')
       .setOrigin(0, 0).setTileScale(S, S).setDepth(-100));
     // Warm tint over wallpaper
     add(this.add.rectangle(w / 2, wallH / 2, w, wallH, 0x331500, 0.2).setDepth(-99));
 
-    // Floor - tiled across the floor area (lower 38%)
+    // Floor - tiled across the rest
     const floorY = wallH;
     const floorH = h - wallH;
     add(this.add.tileSprite(0, floorY, w, floorH, 'floor-tile')
@@ -1660,29 +1663,29 @@ class GameScene extends Phaser.Scene {
     });
 
     // Plates (silverware frame 4 = plate)
-    const plateScale = 3;
-    add(this.add.sprite(tableX - 90, tableTopY + 4, 'silverware', 4)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(112));
-    add(this.add.sprite(tableX + 90, tableTopY + 4, 'silverware', 4)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(112));
+    const cutS = 1.5; // 32px * 1.5 = 48px — proportional to characters
+    add(this.add.sprite(tableX - 80, tableTopY + 4, 'silverware', 4)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(112));
+    add(this.add.sprite(tableX + 80, tableTopY + 4, 'silverware', 4)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(112));
 
     // Enea's cutlery (static, left side)
-    add(this.add.sprite(tableX - 120, tableTopY - 2, 'silverware', 0)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113)); // fork
-    add(this.add.sprite(tableX - 60, tableTopY - 2, 'silverware', 2)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113)); // knife
+    add(this.add.sprite(tableX - 105, tableTopY - 2, 'silverware', 0)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(113)); // fork
+    add(this.add.sprite(tableX - 55, tableTopY - 2, 'silverware', 2)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(113)); // knife
 
     // Elora's cutlery (will fly away during embarrassed effect)
-    this.eloraCutleryFork = this.add.sprite(tableX + 115, tableTopY - 2, 'silverware', 0)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
-    this.eloraCutleryKnife = this.add.sprite(tableX + 65, tableTopY - 2, 'silverware', 2)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
+    this.eloraCutleryFork = this.add.sprite(tableX + 105, tableTopY - 2, 'silverware', 0)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(113);
+    this.eloraCutleryKnife = this.add.sprite(tableX + 55, tableTopY - 2, 'silverware', 2)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(113);
     add(this.eloraCutleryFork);
     add(this.eloraCutleryKnife);
 
     // Napkin near Elora's plate (frame 7 = folded napkin)
-    this.eloraNapkin = this.add.sprite(tableX + 140, tableTopY + 2, 'silverware', 7)
-      .setScale(plateScale).setOrigin(0.5, 0.5).setDepth(113);
+    this.eloraNapkin = this.add.sprite(tableX + 130, tableTopY + 2, 'silverware', 7)
+      .setScale(cutS).setOrigin(0.5, 0.5).setDepth(113);
     add(this.eloraNapkin);
 
     // Warm ambient overlay (entire scene)
@@ -1702,6 +1705,7 @@ class GameScene extends Phaser.Scene {
     this.enea.stop();
     this.enea.setFrame(0);
     this.enea.setDepth(100);   // Behind table (110)
+    this.enea.setTint(0x2a2a3a); // Dark suit for dinner
     this.eneaExpectedX = eneaDinnerX;
 
     this.elora.setPosition(eloraDinnerX, seatY);
@@ -1711,6 +1715,7 @@ class GameScene extends Phaser.Scene {
     this.elora.stop();
     this.elora.setFrame(0);
     this.elora.setDepth(100);   // Behind table (110)
+    this.elora.setTint(0xcc3355); // Red dress for dinner
     this.eloraExpectedX = eloraDinnerX;
 
   }
@@ -1722,6 +1727,15 @@ class GameScene extends Phaser.Scene {
     }
     if (this.enea) { this.enea.setDepth(100); this.enea.setScale(3); }
     if (this.elora) { this.elora.setDepth(100); this.elora.setScale(3); }
+    // Restore episode tints (dinner scene overrides them)
+    const episode = EPISODES[this.currentEpisode];
+    if (episode && episode.tints) {
+      this.enea.setTint(episode.tints.enea);
+      this.elora.setTint(episode.tints.elora);
+    } else {
+      this.enea.clearTint();
+      this.elora.clearTint();
+    }
     this.eloraCutleryFork = null;
     this.eloraCutleryKnife = null;
     this.eloraNapkin = null;
@@ -2393,14 +2407,28 @@ class GameScene extends Phaser.Scene {
     if (this.debugEnabled && this.debugText) {
       const e = this.enea;
       const el = this.elora;
-      this.debugText.setText(
-        `EP${EPISODES[this.currentEpisode]?.id || '?'} | DI:${this.dialogueIndex} | Anim:${this.isAnimating}\n` +
-        `Enea:  vis=${e.visible} a=${e.alpha.toFixed(1)} pos=(${Math.round(e.x)},${Math.round(e.y)}) ` +
-        `sc=${e.scale.toFixed(1)} dp=${e.depth}\n` +
-        `Elora: vis=${el.visible} a=${el.alpha.toFixed(1)} pos=(${Math.round(el.x)},${Math.round(el.y)}) ` +
-        `sc=${el.scale.toFixed(1)} dp=${el.depth}\n` +
-        `Photo: ${this.photoOverlay.visible ? 'OPEN' : 'closed'} | Restaurant: ${this.restaurantElements ? 'active' : 'none'}`
-      );
+      const tintStr = (obj) => obj.tintTopLeft ? `0x${obj.tintTopLeft.toString(16)}` : 'none';
+      let lines = [
+        `EP${EPISODES[this.currentEpisode]?.id || '?'} | DI:${this.dialogueIndex} | Anim:${this.isAnimating} | Tweens:${this.tweens.getTweens().length}`,
+        `Enea:  vis=${e.visible} a=${e.alpha.toFixed(1)} pos=(${Math.round(e.x)},${Math.round(e.y)}) sc=${e.scale.toFixed(1)} dp=${e.depth} tint=${tintStr(e)}`,
+        `Elora: vis=${el.visible} a=${el.alpha.toFixed(1)} pos=(${Math.round(el.x)},${Math.round(el.y)}) sc=${el.scale.toFixed(1)} dp=${el.depth} tint=${tintStr(el)}`,
+      ];
+      // Dog/Baby if visible
+      if (this.dog && this.dog.visible) {
+        lines.push(`Dog:   vis=true pos=(${Math.round(this.dog.x)},${Math.round(this.dog.y)}) sc=${this.dog.scale.toFixed(1)}`);
+      }
+      if (this.baby && this.baby.visible) {
+        lines.push(`Baby:  vis=true pos=(${Math.round(this.baby.x)},${Math.round(this.baby.y)}) sc=${this.baby.scale.toFixed(1)}`);
+      }
+      // Scene state
+      lines.push(`Photo: ${this.photoOverlay.visible ? `OPEN ${this.currentPhotoIndex + 1}/${this.currentPhotos.length}` : 'closed'} | Restaurant: ${this.restaurantElements ? `active (${this.restaurantElements.length} els)` : 'none'}`);
+      // BG layers
+      lines.push(`BG layers: ${this.bgLayers.length} | Speech: ${this.speechBubble.visible ? 'showing' : 'hidden'}`);
+      // Cutlery state if restaurant active
+      if (this.restaurantElements) {
+        lines.push(`Fork: ${this.eloraCutleryFork ? `a=${this.eloraCutleryFork.alpha.toFixed(1)}` : 'gone'} | Knife: ${this.eloraCutleryKnife ? `a=${this.eloraCutleryKnife.alpha.toFixed(1)}` : 'gone'} | Napkin: ${this.eloraNapkin ? `a=${this.eloraNapkin.alpha.toFixed(1)}` : 'gone'}`);
+      }
+      this.debugText.setText(lines.join('\n'));
     }
   }
 }
