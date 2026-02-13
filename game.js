@@ -435,6 +435,8 @@ class BootScene extends Phaser.Scene {
     this.load.image('ceiling-lamp-top', 'assets/backgrounds/interior/Furniture/CeilingLamp_Top.png');
     this.load.image('ceiling-lamp-mid', 'assets/backgrounds/interior/Furniture/CeilingLamp_Mid.png');
     this.load.image('ceiling-lamp-btm', 'assets/backgrounds/interior/Furniture/CeilingLamp_Bottom.png');
+    this.load.image('window-front', 'assets/backgrounds/interior/House/Window_Front.png');
+    this.load.image('mug', 'assets/backgrounds/interior/Furniture/Mug.png');
 
     // Load episode photos dynamically
     EPISODES.forEach(episode => {
@@ -1529,79 +1531,147 @@ class GameScene extends Phaser.Scene {
     const w = this.width;   // 1280
     const h = this.height;  // 720
     const add = (el) => { this.restaurantElements.push(el); return el; };
+    const S = 6; // Pixel art scale factor (8px tiles → 48px on screen)
 
-    // STEP 2: Simple restaurant background
-    // Wall (warm red/brown, upper 60%)
-    add(this.add.rectangle(w / 2, h * 0.3, w, h * 0.6, 0x6b2a2a).setDepth(-100));
-    // Floor (dark wood, lower 40%)
-    add(this.add.rectangle(w / 2, h * 0.8, w, h * 0.4, 0x2a1510).setDepth(-100));
-    // Baseboard divider
-    add(this.add.rectangle(w / 2, h * 0.6, w, 4, 0x4a2820).setDepth(-99));
-    // Warm ambient tint
-    add(this.add.rectangle(w / 2, h / 2, w, h, 0x331500, 0.15).setDepth(-98));
+    // STEP 2: Restaurant background using pixel art tiles
+    // Wallpaper - tiled across the wall area (upper 60%)
+    const wallH = h * 0.62;
+    add(this.add.tileSprite(0, 0, w, wallH, 'wallpaper-tile')
+      .setOrigin(0, 0).setTileScale(S, S).setDepth(-100));
+    // Warm tint over wallpaper
+    add(this.add.rectangle(w / 2, wallH / 2, w, wallH, 0x331500, 0.2).setDepth(-99));
+
+    // Floor - tiled across the floor area (lower 38%)
+    const floorY = wallH;
+    const floorH = h - wallH;
+    add(this.add.tileSprite(0, floorY, w, floorH, 'floor-tile')
+      .setOrigin(0, 0).setTileScale(S, S).setDepth(-100));
+    // Darken floor slightly
+    add(this.add.rectangle(w / 2, floorY + floorH / 2, w, floorH, 0x0a0505, 0.3).setDepth(-99));
+
+    // Baseboard / wainscoting strip
+    add(this.add.rectangle(w / 2, floorY, w, 6, 0x3a1e14).setDepth(-98));
+    add(this.add.rectangle(w / 2, floorY + 3, w, 2, 0x5a3828).setDepth(-97));
+
+    // STEP 2b: Wall decorations
+    // Window (center-left wall)
+    add(this.add.image(w * 0.22, wallH * 0.38, 'window-front')
+      .setScale(S).setOrigin(0.5, 0.5).setDepth(-95));
+    // Night sky glow behind window
+    add(this.add.rectangle(w * 0.22, wallH * 0.38, 16 * S * 0.7, 24 * S * 0.5, 0x1a1a3a, 0.6)
+      .setDepth(-96));
+
+    // Paintings on wall
+    add(this.add.image(w * 0.42, wallH * 0.32, 'painting-lg')
+      .setScale(S).setOrigin(0.5, 0.5).setDepth(-95));
+    add(this.add.image(w * 0.62, wallH * 0.30, 'painting-sm')
+      .setScale(S).setOrigin(0.5, 0.5).setDepth(-95));
+    add(this.add.image(w * 0.78, wallH * 0.34, 'painting-lg')
+      .setScale(S).setOrigin(0.5, 0.5).setDepth(-95).setFlipX(true));
+
+    // Ceiling lamp (assembled from 3 parts) center of room
+    const lampX = w / 2;
+    const lampPartH = 8 * S; // 48px per part
+    add(this.add.image(lampX, 0, 'ceiling-lamp-top')
+      .setScale(S).setOrigin(0.5, 0).setDepth(-94));
+    add(this.add.image(lampX, lampPartH, 'ceiling-lamp-mid')
+      .setScale(S).setOrigin(0.5, 0).setDepth(-94));
+    add(this.add.image(lampX, lampPartH * 2, 'ceiling-lamp-btm')
+      .setScale(S).setOrigin(0.5, 0).setDepth(-94));
+    // Warm light cone from ceiling lamp
+    const lightCone = this.add.graphics().setDepth(-93);
+    lightCone.fillStyle(0xffcc66, 0.06);
+    lightCone.fillTriangle(lampX, lampPartH * 3, lampX - 300, floorY, lampX + 300, floorY);
+    add(lightCone);
+
+    // Floor lamps on far edges
+    add(this.add.image(w * 0.08, floorY, 'floor-lamp')
+      .setScale(S).setOrigin(0.5, 1).setDepth(-90));
+    add(this.add.image(w * 0.92, floorY, 'floor-lamp')
+      .setScale(S).setOrigin(0.5, 1).setDepth(-90).setFlipX(true));
+    // Warm glow circles at floor lamp tops
+    add(this.add.circle(w * 0.08, floorY - 24 * S + 10, 50, 0xffaa33, 0.08).setDepth(-89));
+    add(this.add.circle(w * 0.92, floorY - 24 * S + 10, 50, 0xffaa33, 0.08).setDepth(-89));
+
+    // Plants in corners
+    add(this.add.image(w * 0.04, floorY, 'plant')
+      .setScale(S).setOrigin(0.5, 1).setDepth(-85));
+    add(this.add.image(w * 0.96, floorY, 'plant')
+      .setScale(S).setOrigin(0.5, 1).setDepth(-85).setFlipX(true));
 
     // STEP 3: Table - drawn with graphics at depth 110 (ABOVE characters at 100)
-    // Table centered, wide enough for two characters
     const tableX = w / 2;
-    const tableTopY = h * 0.58; // Table surface Y position
-    const tableW = 400;
+    const tableTopY = h * 0.58;
+    const tableW = 440; // Slightly wider
 
     const tableGfx = this.add.graphics().setDepth(110);
-    // Tablecloth (white, subtle)
+    // Tablecloth (white linen, subtle)
     tableGfx.fillStyle(0xffeedd, 0.3);
-    tableGfx.fillRoundedRect(tableX - tableW / 2 - 8, tableTopY - 4, tableW + 16, 28, 6);
-    // Table surface
+    tableGfx.fillRoundedRect(tableX - tableW / 2 - 10, tableTopY - 5, tableW + 20, 30, 6);
+    // Table surface (dark wood)
     tableGfx.fillStyle(0x5c3a28, 1);
-    tableGfx.fillRoundedRect(tableX - tableW / 2, tableTopY, tableW, 20, 4);
-    // Highlight
+    tableGfx.fillRoundedRect(tableX - tableW / 2, tableTopY, tableW, 22, 4);
+    // Highlight stripe
     tableGfx.fillStyle(0x7a5038, 1);
-    tableGfx.fillRoundedRect(tableX - tableW / 2 + 6, tableTopY + 3, tableW - 12, 6, 2);
+    tableGfx.fillRoundedRect(tableX - tableW / 2 + 8, tableTopY + 4, tableW - 16, 6, 2);
     // Legs
     tableGfx.fillStyle(0x4a2a18, 1);
-    tableGfx.fillRect(tableX - tableW / 2 + 20, tableTopY + 20, 10, 80);
-    tableGfx.fillRect(tableX + tableW / 2 - 30, tableTopY + 20, 10, 80);
+    tableGfx.fillRect(tableX - tableW / 2 + 20, tableTopY + 22, 10, 80);
+    tableGfx.fillRect(tableX + tableW / 2 - 30, tableTopY + 22, 10, 80);
     add(tableGfx);
 
+    // Chairs at table (behind characters, depth 95)
+    add(this.add.image(tableX - 150, floorY, 'chair')
+      .setScale(S).setOrigin(0.5, 1).setDepth(95));
+    add(this.add.image(tableX + 150, floorY, 'chair')
+      .setScale(S).setOrigin(0.5, 1).setDepth(95).setFlipX(true));
+
     // STEP 4: Table items (depth 112, above table surface)
-    // Small candle
+    // Candle centerpiece
     add(this.add.image(tableX, tableTopY, 'candle')
-      .setScale(4).setOrigin(0.5, 1).setDepth(112));
-    const glow = this.add.circle(tableX, tableTopY - 25, 40, 0xffaa33, 0.1).setDepth(112);
+      .setScale(S * 0.7).setOrigin(0.5, 1).setDepth(112));
+    const glow = this.add.circle(tableX, tableTopY - 30, 45, 0xffaa33, 0.12).setDepth(112);
     add(glow);
     this.tweens.add({
-      targets: glow, alpha: 0.05, scaleX: 0.85, scaleY: 0.85,
-      duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+      targets: glow, alpha: 0.06, scaleX: 0.85, scaleY: 0.85,
+      duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
     });
 
-    // Small plates
+    // Plates
     const plateGfx = this.add.graphics().setDepth(112);
-    [-80, 80].forEach(off => {
+    [-90, 90].forEach(off => {
       plateGfx.fillStyle(0xeeeeee, 0.8);
-      plateGfx.fillCircle(tableX + off, tableTopY + 6, 14);
+      plateGfx.fillCircle(tableX + off, tableTopY + 7, 15);
       plateGfx.lineStyle(1, 0xcccccc, 0.6);
-      plateGfx.strokeCircle(tableX + off, tableTopY + 6, 14);
+      plateGfx.strokeCircle(tableX + off, tableTopY + 7, 15);
     });
     add(plateGfx);
 
+    // Mugs on table
+    add(this.add.image(tableX - 55, tableTopY, 'mug')
+      .setScale(S * 0.5).setOrigin(0.5, 1).setDepth(112));
+    add(this.add.image(tableX + 55, tableTopY, 'mug')
+      .setScale(S * 0.5).setOrigin(0.5, 1).setDepth(112).setFlipX(true));
+
     // Cutlery near Elora's plate (for embarrassed animation)
-    this.eloraCutleryFork = this.add.text(tableX + 100, tableTopY + 2, '🍴', {
+    this.eloraCutleryFork = this.add.text(tableX + 112, tableTopY + 2, '🍴', {
       fontSize: '14px'
     }).setOrigin(0.5).setDepth(113);
-    this.eloraCutleryKnife = this.add.text(tableX + 60, tableTopY + 2, '🔪', {
+    this.eloraCutleryKnife = this.add.text(tableX + 68, tableTopY + 2, '🔪', {
       fontSize: '12px'
     }).setOrigin(0.5).setDepth(113);
     add(this.eloraCutleryFork);
     add(this.eloraCutleryKnife);
 
+    // Warm ambient overlay (entire scene)
+    add(this.add.rectangle(w / 2, h / 2, w, h, 0x331500, 0.08).setDepth(-80));
+
     // STEP 5: Position characters at the table
-    // Scale down to 2.5 for restaurant (normal is 3)
-    // At scale 2.5: 100*2.5=250w, 64*2.5=160h pixels. Origin (0.5,1)=feet at Y.
-    // Table covers lower 35% → feet at tableTopY + (160 * 0.35) = tableTopY + 56
     const dinnerScale = 2.5;
     const spriteH = 64 * dinnerScale; // 160px
     const seatY = tableTopY + Math.round(spriteH * 0.35);
-    const eneaDinnerX = tableX - 130;  // Well left of center
-    const eloraDinnerX = tableX + 130; // Well right of center
+    const eneaDinnerX = tableX - 150;  // Wider spread
+    const eloraDinnerX = tableX + 150;
 
     this.enea.setPosition(eneaDinnerX, seatY);
     this.enea.setScale(dinnerScale);
