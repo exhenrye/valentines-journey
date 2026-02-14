@@ -11,7 +11,7 @@ const EPISODES = [
     date: "October 20, 2017",
     background: "town-night",
     icon: "🌹",
-    outfits: { elora: 'female-dress-red' }, // Red dress for Madrid date night
+    outfits: { elora: 'female-dress-red' }, // Night date: casual, no hats
     caption: "Your phone died. We almost didn't find each other. But somehow, in the crowd of Serrano, we did. Thigh-high boots, a cream dress, and the most beautiful woman I'd ever seen.",
     noPhoto: true,
     dialogue: [
@@ -37,7 +37,7 @@ const EPISODES = [
     date: "December 21-23, 2017",
     background: "town-sunset",
     icon: "🏰",
-    outfits: { elora: 'female-bodice-orange' }, // Orange top for Granada travel
+    outfits: { enea: 'male-split-hose', eneaHat: 'male-blue-cap', elora: 'female-bodice-orange' }, // Travel look
     caption: "Our first real adventure together. Wandering the Alhambra, getting lost in narrow streets, realizing I never wanted to travel without you again.",
     photos: [
       'assets/photos/02-granada/kiss-selfie.jpg',
@@ -72,7 +72,7 @@ const EPISODES = [
     date: "October 2018",
     background: "christmas-night",
     icon: "✈️",
-    outfits: { elora: 'female-bodice-purple' }, // Purple sweater for Leavenworth
+    outfits: { eneaHat: 'male-santa-hat', elora: 'female-bodice-purple', eloraHat: 'female-santa-hat' }, // Christmas town
     caption: "We were an ocean apart. On our anniversary, I surprised you—flew across the world just to see your face. Every mile was worth it.",
     dialogue: [
       { speaker: 'elora', text: "I miss him so much today...", action: 'elora-alone' },
@@ -90,6 +90,7 @@ const EPISODES = [
     date: "2019",
     background: "mountains",
     icon: "⛰️",
+    outfits: { enea: 'male-split-hose', eneaHat: 'male-green-cap', elora: 'female-bodice-green', eloraHat: 'female-blue-cap' },
     caption: "You left everything—your country, your family, your comfort—to build a life with me. The courage that took still amazes me. You chose us.",
     dialogue: [
       { speaker: 'enea', text: "She's really doing this. She's coming.", action: 'enea-alone' },
@@ -106,6 +107,7 @@ const EPISODES = [
     date: "2019",
     background: "town-day",
     icon: "♡",
+    outfits: { eneaHat: 'male-farming-hat', elora: 'female-bodice-orange', eloraHat: 'female-hat1' },
     caption: "Our first baby. That little bull terrier made us a family. He taught us how to love something together.",
     dialogue: [
       { action: 'walk-together-start' },
@@ -124,6 +126,7 @@ const EPISODES = [
     date: "2020",
     background: "town-day",
     icon: "♡",
+    outfits: { enea: 'male-split-hose', eneaHat: 'male-hat2', elora: 'female-bodice-purple', eloraHat: 'female-hat2' },
     caption: "Our first home. Just us, our animals, and a pandemic. We weathered the storm together. I'd do it all again with you.",
     dialogue: [
       { action: 'walk-together-start' },
@@ -139,6 +142,7 @@ const EPISODES = [
     date: "May 3, 2022",
     background: "sunset",
     icon: "♡",
+    outfits: { enea: 'male-split-hose', elora: 'female-dress-blue' }, // No hats - romantic moment
     caption: "I asked you to be mine forever. You said yes. The happiest moment of my life—until you kept topping it.",
     dialogue: [
       { action: 'face-each-other' },
@@ -156,6 +160,7 @@ const EPISODES = [
     date: "August 13, 2022",
     background: "forest",
     icon: "♡",
+    outfits: { enea: 'male-chainmail', eneaHat: 'male-guard-helmet', elora: 'female-queen-dress', eloraHat: 'female-hat3' }, // Wedding formal
     caption: "Surrounded by everyone we love. You walked toward me and I couldn't breathe. The day you became my wife.",
     dialogue: [
       { speaker: 'enea', text: "She's so beautiful... I can't breathe.", action: 'wedding-setup' },
@@ -172,6 +177,7 @@ const EPISODES = [
     date: "2022-2023",
     background: "city-night",
     icon: "♡",
+    outfits: { eneaHat: 'male-red-cap', elora: 'female-bodice-green', eloraHat: 'female-red-cap' },
     caption: "A new continent. A new chapter. We packed our life into suitcases and started over. Because we're braver together.",
     dialogue: [
       { action: 'plane' },
@@ -188,6 +194,7 @@ const EPISODES = [
     date: "May 2025",
     background: "town-day",
     icon: "♡",
+    outfits: { eneaHat: 'male-orange-cap', elora: 'female-dress-red', eloraHat: 'female-hat1' },
     caption: "A house with a backyard. Rome in the field. This isn't just where we live—it's where we're building our forever.",
     dialogue: [
       { action: 'walk-together-start' },
@@ -202,6 +209,7 @@ const EPISODES = [
     date: "July 28, 2025",
     background: "town-sunset",
     icon: "♡",
+    outfits: { eneaHat: 'male-purple-cap', elora: 'female-fancy-blue', eloraHat: 'female-blue-cap' },
     caption: "The most perfect little boy arrived. You made me a father. You made us complete. I didn't know my heart could hold this much love.",
     dialogue: [
       { action: 'face-each-other' },
@@ -220,6 +228,7 @@ const EPISODES = [
     date: "Valentine's Day",
     background: "sunset-purple",
     icon: "♡",
+    outfits: { enea: 'male-chainmail', elora: 'female-queen-dress' }, // No hats - romantic finale
     caption: "From a Tinder match in Madrid to a family in Seattle. I'm the luckiest man alive. Here's to forever, my love.",
     dialogue: [
       { action: 'family-together' },
@@ -460,6 +469,21 @@ class BootScene extends Phaser.Scene {
     ];
     clothesList.forEach(key => {
       this.load.spritesheet(key, clothesBase + key + '.png', {
+        frameWidth: 100, frameHeight: 64
+      });
+    });
+
+    // Load hat overlays (GandalfHardcore pack - same 100x64 frame layout)
+    const hatsBase = 'assets/chars/hats/';
+    const hatsList = [
+      'male-hat1', 'male-hat2', 'male-hat3', 'male-hat4', 'male-hat5',
+      'male-blue-cap', 'male-green-cap', 'male-red-cap', 'male-orange-cap',
+      'male-purple-cap', 'male-santa-hat', 'male-guard-helmet', 'male-farming-hat',
+      'female-hat1', 'female-hat2', 'female-hat3', 'female-santa-hat',
+      'female-blue-cap', 'female-red-cap'
+    ];
+    hatsList.forEach(key => {
+      this.load.spritesheet(key, hatsBase + key + '.png', {
         frameWidth: 100, frameHeight: 64
       });
     });
@@ -728,6 +752,12 @@ class GameScene extends Phaser.Scene {
       .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
     this.eloraClothes = this.add.sprite(0, 0, 'female-dress-red')
       .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
+
+    // Hat overlay sprites (rendered on top of clothing overlays)
+    this.eneaHat = this.add.sprite(0, 0, 'male-hat1')
+      .setScale(3).setOrigin(0.5, 1).setDepth(102).setVisible(false);
+    this.eloraHat = this.add.sprite(0, 0, 'female-hat1')
+      .setScale(3).setOrigin(0.5, 1).setDepth(102).setVisible(false);
 
     // Dog sprite (Totoro - hidden initially)
     this.dog = this.add.sprite(width * 0.2, this.groundY, 'dog')
@@ -1726,6 +1756,8 @@ class GameScene extends Phaser.Scene {
     // Dinner outfit: swap to chainmail for fancy/formal look
     this.currentEneaOutfit = 'male-chainmail';
     this.eneaClothes.setTexture('male-chainmail');
+    // No hats at dinner
+    this.currentEneaHat = null;
 
     this.elora.setPosition(eloraDinnerX, seatY);
     this.elora.setScale(dinnerScale);
@@ -1737,6 +1769,7 @@ class GameScene extends Phaser.Scene {
     // Dinner outfit: fancy blue dress
     this.currentEloraOutfit = 'female-fancy-blue';
     this.eloraClothes.setTexture('female-fancy-blue');
+    this.currentEloraHat = null; // No hats at dinner
     this.eloraExpectedX = eloraDinnerX;
 
   }
@@ -1755,9 +1788,22 @@ class GameScene extends Phaser.Scene {
     } else {
       this.currentEloraOutfit = null;
     }
+    // Set hat overlay textures
+    if (outfits && outfits.eneaHat && this.textures.exists(outfits.eneaHat)) {
+      this.eneaHat.setTexture(outfits.eneaHat);
+      this.currentEneaHat = outfits.eneaHat;
+    } else {
+      this.currentEneaHat = null;
+    }
+    if (outfits && outfits.eloraHat && this.textures.exists(outfits.eloraHat)) {
+      this.eloraHat.setTexture(outfits.eloraHat);
+      this.currentEloraHat = outfits.eloraHat;
+    } else {
+      this.currentEloraHat = null;
+    }
   }
 
-  syncClothingOverlay(base, overlay, outfitKey) {
+  syncClothingOverlay(base, overlay, outfitKey, depthOffset) {
     // Sync overlay with base character: position, frame, scale, flip, visibility, depth, alpha
     if (!outfitKey || !base.visible) {
       overlay.setVisible(false);
@@ -1768,7 +1814,7 @@ class GameScene extends Phaser.Scene {
     overlay.setScale(base.scaleX, base.scaleY);
     overlay.setFlipX(base.flipX);
     overlay.setOrigin(base.originX, base.originY);
-    overlay.setDepth(base.depth + 1);
+    overlay.setDepth(base.depth + (depthOffset || 1));
     overlay.setAlpha(base.alpha);
     // Sync animation frame
     overlay.setFrame(base.frame.name);
@@ -2453,8 +2499,11 @@ class GameScene extends Phaser.Scene {
     });
 
     // Sync clothing overlays with base characters every frame
-    this.syncClothingOverlay(this.enea, this.eneaClothes, this.currentEneaOutfit);
-    this.syncClothingOverlay(this.elora, this.eloraClothes, this.currentEloraOutfit);
+    this.syncClothingOverlay(this.enea, this.eneaClothes, this.currentEneaOutfit, 1);
+    this.syncClothingOverlay(this.elora, this.eloraClothes, this.currentEloraOutfit, 1);
+    // Sync hat overlays (depth +2 above base, so above clothing)
+    this.syncClothingOverlay(this.enea, this.eneaHat, this.currentEneaHat, 2);
+    this.syncClothingOverlay(this.elora, this.eloraHat, this.currentEloraHat, 2);
 
     // Debug overlay (toggle with D key)
     if (this.debugEnabled && this.debugText) {
@@ -2475,6 +2524,9 @@ class GameScene extends Phaser.Scene {
       }
       // Scene state
       lines.push(`Photo: ${this.photoOverlay.visible ? `OPEN ${this.currentPhotoIndex + 1}/${this.currentPhotos.length}` : 'closed'} | Restaurant: ${this.restaurantElements ? `active (${this.restaurantElements.length} els)` : 'none'}`);
+      // Outfits
+      lines.push(`Outfit E: ${this.currentEneaOutfit || 'none'} Hat: ${this.currentEneaHat || 'none'}`);
+      lines.push(`Outfit L: ${this.currentEloraOutfit || 'none'} Hat: ${this.currentEloraHat || 'none'}`);
       // BG layers
       lines.push(`BG layers: ${this.bgLayers.length} | Speech: ${this.speechBubble.visible ? 'showing' : 'hidden'}`);
       // Cutlery state if restaurant active
