@@ -11,7 +11,7 @@ const EPISODES = [
     date: "October 20, 2017",
     background: "town-night",
     icon: "🌹",
-    tints: { enea: 0xccccff, elora: 0xffd4e8 }, // Cool evening tones / cream dress
+    outfits: { elora: 'female-dress-red' }, // Red dress for Madrid date night
     caption: "Your phone died. We almost didn't find each other. But somehow, in the crowd of Serrano, we did. Thigh-high boots, a cream dress, and the most beautiful woman I'd ever seen.",
     noPhoto: true,
     dialogue: [
@@ -37,7 +37,7 @@ const EPISODES = [
     date: "December 21-23, 2017",
     background: "town-sunset",
     icon: "🏰",
-    tints: { enea: 0xddd8c8, elora: 0xffccaa }, // Warm travel casual
+    outfits: { elora: 'female-bodice-orange' }, // Orange top for Granada travel
     caption: "Our first real adventure together. Wandering the Alhambra, getting lost in narrow streets, realizing I never wanted to travel without you again.",
     photos: [
       'assets/photos/02-granada/kiss-selfie.jpg',
@@ -72,7 +72,7 @@ const EPISODES = [
     date: "October 2018",
     background: "christmas-night",
     icon: "✈️",
-    tints: { enea: 0xaabbcc, elora: 0xeeccdd }, // Winter layers
+    outfits: { elora: 'female-bodice-purple' }, // Purple sweater for Leavenworth
     caption: "We were an ocean apart. On our anniversary, I surprised you—flew across the world just to see your face. Every mile was worth it.",
     dialogue: [
       { speaker: 'elora', text: "I miss him so much today...", action: 'elora-alone' },
@@ -451,6 +451,19 @@ class BootScene extends Phaser.Scene {
     });
     // Furniture frames: 0=stool, 1=table, 2=chair, 3=door
 
+    // Load clothing overlays (GandalfHardcore pack - same 100x64 frame layout as base sprites)
+    const clothesBase = 'assets/chars/clothes/';
+    const clothesList = [
+      'female-dress-red', 'female-dress-blue', 'female-bodice-orange',
+      'female-bodice-purple', 'female-bodice-green', 'female-queen-dress',
+      'female-fancy-blue', 'male-chainmail', 'male-split-hose'
+    ];
+    clothesList.forEach(key => {
+      this.load.spritesheet(key, clothesBase + key + '.png', {
+        frameWidth: 100, frameHeight: 64
+      });
+    });
+
     // Load episode photos dynamically
     EPISODES.forEach(episode => {
       if (episode.photos) {
@@ -708,7 +721,13 @@ class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDepth(100)
       .setVisible(false);
-    this.elora.setFrame(0); // Static frame, no animation
+    this.elora.setFrame(0);
+
+    // Clothing overlay sprites (rendered on top of base characters)
+    this.eneaClothes = this.add.sprite(0, 0, 'male-split-hose')
+      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
+    this.eloraClothes = this.add.sprite(0, 0, 'female-dress-red')
+      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
 
     // Dog sprite (Totoro - hidden initially)
     this.dog = this.add.sprite(width * 0.2, this.groundY, 'dog')
@@ -993,14 +1012,12 @@ class GameScene extends Phaser.Scene {
     this.elora.stop();
     this.elora.setFrame(0);
 
-    // Apply episode-specific tints for outfit differentiation
-    if (episode.tints) {
-      this.enea.setTint(episode.tints.enea);
-      this.elora.setTint(episode.tints.elora);
-    } else {
-      this.enea.clearTint();
-      this.elora.clearTint();
-    }
+    // Clear tints (dinner scene may have set them)
+    this.enea.clearTint();
+    this.elora.clearTint();
+
+    // Apply clothing overlays for this episode
+    this.applyOutfits(episode.outfits);
 
     this.dog.setVisible(false);
     this.dog.setPosition(this.width * 0.2, this.groundY);
@@ -1705,8 +1722,10 @@ class GameScene extends Phaser.Scene {
     this.enea.stop();
     this.enea.setFrame(0);
     this.enea.setDepth(100);   // Behind table (110)
-    this.enea.setTint(0x2a2a3a); // Dark suit for dinner
     this.eneaExpectedX = eneaDinnerX;
+    // Dinner outfit: swap to chainmail for fancy/formal look
+    this.currentEneaOutfit = 'male-chainmail';
+    this.eneaClothes.setTexture('male-chainmail');
 
     this.elora.setPosition(eloraDinnerX, seatY);
     this.elora.setScale(dinnerScale);
@@ -1715,9 +1734,44 @@ class GameScene extends Phaser.Scene {
     this.elora.stop();
     this.elora.setFrame(0);
     this.elora.setDepth(100);   // Behind table (110)
-    this.elora.setTint(0xcc3355); // Red dress for dinner
+    // Dinner outfit: fancy blue dress
+    this.currentEloraOutfit = 'female-fancy-blue';
+    this.eloraClothes.setTexture('female-fancy-blue');
     this.eloraExpectedX = eloraDinnerX;
 
+  }
+
+  applyOutfits(outfits) {
+    // Set clothing overlay textures for this episode
+    if (outfits && outfits.enea && this.textures.exists(outfits.enea)) {
+      this.eneaClothes.setTexture(outfits.enea);
+      this.currentEneaOutfit = outfits.enea;
+    } else {
+      this.currentEneaOutfit = null;
+    }
+    if (outfits && outfits.elora && this.textures.exists(outfits.elora)) {
+      this.eloraClothes.setTexture(outfits.elora);
+      this.currentEloraOutfit = outfits.elora;
+    } else {
+      this.currentEloraOutfit = null;
+    }
+  }
+
+  syncClothingOverlay(base, overlay, outfitKey) {
+    // Sync overlay with base character: position, frame, scale, flip, visibility, depth, alpha
+    if (!outfitKey || !base.visible) {
+      overlay.setVisible(false);
+      return;
+    }
+    overlay.setVisible(true);
+    overlay.setPosition(base.x, base.y);
+    overlay.setScale(base.scaleX, base.scaleY);
+    overlay.setFlipX(base.flipX);
+    overlay.setOrigin(base.originX, base.originY);
+    overlay.setDepth(base.depth + 1);
+    overlay.setAlpha(base.alpha);
+    // Sync animation frame
+    overlay.setFrame(base.frame.name);
   }
 
   cleanupRestaurant() {
@@ -1725,17 +1779,11 @@ class GameScene extends Phaser.Scene {
       this.restaurantElements.forEach(el => { if (el && el.destroy) el.destroy(); });
       this.restaurantElements = null;
     }
-    if (this.enea) { this.enea.setDepth(100); this.enea.setScale(3); }
-    if (this.elora) { this.elora.setDepth(100); this.elora.setScale(3); }
-    // Restore episode tints (dinner scene overrides them)
+    if (this.enea) { this.enea.setDepth(100); this.enea.setScale(3); this.enea.clearTint(); }
+    if (this.elora) { this.elora.setDepth(100); this.elora.setScale(3); this.elora.clearTint(); }
+    // Restore episode outfits (dinner scene overrides them)
     const episode = EPISODES[this.currentEpisode];
-    if (episode && episode.tints) {
-      this.enea.setTint(episode.tints.enea);
-      this.elora.setTint(episode.tints.elora);
-    } else {
-      this.enea.clearTint();
-      this.elora.clearTint();
-    }
+    if (episode) this.applyOutfits(episode.outfits);
     this.eloraCutleryFork = null;
     this.eloraCutleryKnife = null;
     this.eloraNapkin = null;
@@ -1857,8 +1905,9 @@ class GameScene extends Phaser.Scene {
     let bubbleX = charX;
     // Position bubble above the character's head
     // Character sprite is 192px tall (64 * scale 3), origin at bottom
-    // Head is at char.y - 192, bubble goes above that
-    let bubbleY = char.y - 220;
+    // Head is at char.y - 192, bubble goes well above that
+    // Extra gap leaves room for blush/emotion effects above the head
+    let bubbleY = char.y - 260;
 
     // Keep bubble on screen
     const screenWidth = this.width || 1280;
@@ -2402,6 +2451,10 @@ class GameScene extends Phaser.Scene {
     this.bgLayers.forEach(layer => {
       layer.sprite.tilePositionX += layer.speed * 0.02;
     });
+
+    // Sync clothing overlays with base characters every frame
+    this.syncClothingOverlay(this.enea, this.eneaClothes, this.currentEneaOutfit);
+    this.syncClothingOverlay(this.elora, this.eloraClothes, this.currentEloraOutfit);
 
     // Debug overlay (toggle with D key)
     if (this.debugEnabled && this.debugText) {
