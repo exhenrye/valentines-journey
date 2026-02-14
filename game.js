@@ -451,6 +451,11 @@ class BootScene extends Phaser.Scene {
       frameHeight: 32
     });
 
+    // Load baby sprite sheet (Elthen pack - 32x32 frames, 12 cols x 6 rows)
+    this.load.spritesheet('baby', 'assets/characters/baby/Human Baby Sprite Sheet.png', {
+      frameWidth: 32, frameHeight: 32
+    });
+
     // Load restaurant / interior assets
     this.load.image('wallpaper-tile', 'assets/backgrounds/interior/House/Wallpaper5_Tile.png');
     this.load.image('floor-tile', 'assets/backgrounds/interior/House/Platform_Middle.png');
@@ -555,6 +560,22 @@ class BootScene extends Phaser.Scene {
       key: 'dog-walk',
       frames: this.anims.generateFrameNumbers('dog', { start: 0, end: 7 }),
       frameRate: 10,
+      repeat: -1
+    });
+
+    // Baby animations (sprite sheet: 12 columns x 6 rows, 32x32 per frame)
+    // Row 0 (frames 0-11): idle, Row 3 (frames 36-47): cry
+    this.anims.create({
+      key: 'baby-idle',
+      frames: this.anims.generateFrameNumbers('baby', { start: 0, end: 11 }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: 'baby-cry',
+      frames: this.anims.generateFrameNumbers('baby', { start: 36, end: 47 }),
+      frameRate: 8,
       repeat: -1
     });
 
@@ -784,14 +805,13 @@ class GameScene extends Phaser.Scene {
       .setVisible(false);
     this.dog.setFrame(0);
 
-    // Baby placeholder (simple drawn shape, hidden initially)
-    this.baby = this.add.graphics();
-    this.baby.fillStyle(0xFFDDBB, 1); // Skin tone
-    this.baby.fillCircle(0, 0, 12); // Head
-    this.baby.fillStyle(0xFFB6C1, 1); // Pink for clothes
-    this.baby.fillCircle(0, 18, 10); // Body
-    this.baby.setPosition(width * 0.5, this.groundY - 80);
-    this.baby.setVisible(false).setDepth(100);
+    // Baby sprite (Elthen pack - hidden initially, shown in EP11)
+    this.baby = this.add.sprite(width * 0.5, this.groundY, 'baby')
+      .setScale(3)
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setVisible(false);
+    this.baby.setFrame(0);
 
     // Create UI layer (highest depth)
     this.uiContainer = this.add.container(0, 0).setDepth(200);
@@ -1072,6 +1092,8 @@ class GameScene extends Phaser.Scene {
     this.dog.setFrame(0);
 
     this.baby.setVisible(false);
+    this.baby.stop();
+    this.baby.setFrame(0);
 
     // Block input during location card display
     this.isAnimating = true;
@@ -1489,9 +1511,10 @@ class GameScene extends Phaser.Scene {
 
       case 'baby-arrive':
         this.hasBaby = true;
-        this.baby.setPosition(this.width * 0.5, this.height * 0.6);
+        this.baby.setPosition(this.width * 0.5, this.groundY);
         this.baby.setVisible(true);
         this.baby.setAlpha(0);
+        this.baby.play('baby-idle');
 
         this.tweens.add({
           targets: this.baby,
@@ -1534,8 +1557,9 @@ class GameScene extends Phaser.Scene {
           this.dog.setVisible(true);
         }
         if (this.hasBaby) {
-          this.baby.setPosition(this.width * 0.4, this.height * 0.6);
+          this.baby.setPosition(this.width * 0.4, this.groundY);
           this.baby.setVisible(true);
+          this.baby.play('baby-idle');
         }
         this.isAnimating = false;
         this.dialogueIndex++;
