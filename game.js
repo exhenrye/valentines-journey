@@ -140,7 +140,7 @@ const EPISODES = [
     id: 7,
     name: "The Proposal",
     date: "May 3, 2022",
-    background: "sunset",
+    background: "ancient-temple",
     icon: "♡",
     outfits: { enea: 'male-split-hose', elora: 'female-dress-blue' }, // No hats - romantic moment
     caption: "I asked you to be mine forever. You said yes. The happiest moment of my life—until you kept topping it.",
@@ -309,6 +309,15 @@ const BACKGROUNDS = {
       { key: 'purple4', speed: 1.0 }
     ]
   },
+  'ancient-temple': {
+    layers: [
+      { key: 'temple1', speed: 0.05 },
+      { key: 'temple2', speed: 0.15 },
+      { key: 'temple3', speed: 0.35 },
+      { key: 'temple4', speed: 0.6 },
+      { key: 'temple5', speed: 1.0 }
+    ]
+  },
   'christmas-night': {
     layers: [
       { key: 'xmas1', speed: 0.05 },
@@ -409,6 +418,14 @@ class BootScene extends Phaser.Scene {
     this.load.image('xmas7', xmasBase + 'PixelTown_Christmasnight_layer07.png');
     this.load.image('xmas9', xmasBase + 'PixelTown_Christmasnight_layer09.png');
     this.load.image('xmas10', xmasBase + 'PixelTown_Christmasnight_layer10.png');
+
+    // Load ancient temple backgrounds (for Rome proposal)
+    const templeBase = 'assets/backgrounds/ancient-temple/PNG/background 3/';
+    this.load.image('temple1', templeBase + 'Plan 1.png');
+    this.load.image('temple2', templeBase + 'Plan 2.png');
+    this.load.image('temple3', templeBase + 'Plan 3.png');
+    this.load.image('temple4', templeBase + 'Plan 4.png');
+    this.load.image('temple5', templeBase + 'Plan 5.png');
 
     // Load mountain backgrounds
     this.load.image('mtn-sky', 'assets/backgrounds/mountains-dusk/sky.png');
