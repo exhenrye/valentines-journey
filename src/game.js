@@ -611,10 +611,10 @@ class GameScene extends Phaser.Scene {
     // Track dialogue history for back navigation
     this.dialogueHistory = [];
 
-    // Plane for flying animation
-    this.plane = this.add.text(-100, height * 0.3, '✈️', {
-      fontSize: '64px'
-    }).setVisible(false);
+    // Plane for flying animation (drawn pixel art, no emoji)
+    this.plane = this.createPixelPlane();
+    this.plane.setPosition(-100, height * 0.3);
+    this.plane.setVisible(false);
 
     // Hearts container for explosion
     this.heartsContainer = this.add.container(0, 0);
@@ -1170,6 +1170,27 @@ class GameScene extends Phaser.Scene {
         this.plane.setPosition(-100, this.height * 0.25);
         this.plane.setVisible(true);
 
+        // Contrail: spawn fading white dots behind the plane
+        const trailTimer = this.time.addEvent({
+          delay: 60,
+          callback: () => {
+            if (!this.plane.visible) return;
+            const dot = this.add.circle(
+              this.plane.x - 35, this.plane.y,
+              2 + Math.random() * 2, 0xffffff, 0.4
+            ).setDepth(199);
+            this.tweens.add({
+              targets: dot,
+              alpha: 0,
+              scaleX: 3,
+              scaleY: 3,
+              duration: 1000,
+              onComplete: () => dot.destroy()
+            });
+          },
+          loop: true,
+        });
+
         this.tweens.add({
           targets: this.plane,
           x: this.width + 100,
@@ -1178,6 +1199,7 @@ class GameScene extends Phaser.Scene {
           ease: 'Sine.easeInOut',
           onComplete: () => {
             this.plane.setVisible(false);
+            trailTimer.destroy();
             this.isAnimating = false;
             this.dialogueIndex++;
             this.processDialogue();
@@ -1774,6 +1796,51 @@ class GameScene extends Phaser.Scene {
     graphics.fillTriangle(-size, -r * 0.3, size, -r * 0.3, 0, size * 1.2);
     graphics.setPosition(x, y);
     return graphics;
+  }
+
+  // Draw a pixel-art airplane using Phaser Graphics (no emoji)
+  createPixelPlane() {
+    const container = this.add.container(0, 0).setDepth(200);
+    const g = this.add.graphics();
+
+    // Fuselage body — rounded white cylinder
+    g.fillStyle(0xe8eef4, 1);
+    g.fillRoundedRect(-30, -7, 60, 14, 5);
+
+    // Nose cone
+    g.fillStyle(0xd0d8e0, 1);
+    g.fillTriangle(30, -6, 30, 6, 40, 0);
+
+    // Main wings — wide swept triangles
+    g.fillStyle(0xc8d4e0, 1);
+    g.fillTriangle(-4, -5, 12, -5, 2, -30);
+    g.fillTriangle(-4, 5, 12, 5, 2, 30);
+
+    // Tail vertical stabilizer
+    g.fillStyle(0xb0c0d0, 1);
+    g.fillTriangle(-28, -5, -20, -5, -28, -22);
+
+    // Tail horizontal stabilizers
+    g.fillStyle(0xc0ccd8, 1);
+    g.fillTriangle(-28, -3, -18, -3, -28, -12);
+    g.fillTriangle(-28, 3, -18, 3, -28, 12);
+
+    // Passenger windows — row of small blue dots
+    g.fillStyle(0x6699cc, 0.9);
+    for (let wx = -16; wx <= 20; wx += 6) {
+      g.fillCircle(wx, -2, 1.5);
+    }
+
+    // Cockpit window
+    g.fillStyle(0x88bbee, 1);
+    g.fillCircle(28, -1, 3);
+
+    // Red accent stripe along fuselage
+    g.lineStyle(1, 0xcc4444, 0.6);
+    g.lineBetween(-28, 2, 28, 2);
+
+    container.add(g);
+    return container;
   }
 
   createBlushEffect() {
