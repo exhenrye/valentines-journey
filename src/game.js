@@ -1102,6 +1102,95 @@ class GameScene extends Phaser.Scene {
         });
         break;
 
+      case 'enea-arrive':
+        // Enea enters from RIGHT (e.g. drove there), walks LEFT
+        this.enea.setPosition(this.width + 100, this.groundY);
+        this.enea.setVisible(true);
+        this.enea.setFlipX(false); // Face left
+        this.enea.play('male-walk');
+        this.eneaExpectedX = this.width * 0.6;
+
+        this.tweens.add({
+          targets: this.enea,
+          x: this.width * 0.6,
+          duration: 2000,
+          ease: 'Linear',
+          onComplete: () => {
+            this.enea.stop();
+            this.enea.setFrame(0);
+            this.showSpeech(dialogue.speaker, dialogue.text);
+          }
+        });
+        break;
+
+      case 'elora-exit':
+        // Elora walks off-screen to the left, auto-advance
+        this.elora.setFlipX(false); // Face left
+        this.elora.play('female-walk');
+        this.tweens.add({
+          targets: this.elora,
+          x: -100,
+          duration: 2000,
+          ease: 'Linear',
+          onComplete: () => {
+            this.elora.stop();
+            this.elora.setVisible(false);
+            this.isAnimating = false;
+            this.dialogueIndex++;
+            this.processDialogue();
+          }
+        });
+        break;
+
+      case 'elora-appear':
+        // Elora rushes in from left (e.g. woke up, surprised)
+        this.elora.setPosition(-100, this.groundY);
+        this.elora.setVisible(true);
+        this.elora.setFlipX(true); // Face right toward Enea
+        this.elora.play('female-walk');
+        this.eloraExpectedX = this.width * 0.35;
+
+        this.tweens.add({
+          targets: this.elora,
+          x: this.width * 0.35,
+          duration: 1200,
+          ease: 'Cubic.easeOut',
+          onComplete: () => {
+            this.elora.stop();
+            this.elora.setFrame(0);
+            this.showSpeech(dialogue.speaker, dialogue.text);
+          }
+        });
+        break;
+
+      case 'journey-text': {
+        // Fade in/out a text card (e.g. "Geneva → Seattle → Leavenworth")
+        const journeyLabel = dialogue.text || '';
+        const jt = this.add.text(this.width / 2, this.height / 2, journeyLabel, {
+          fontSize: '28px',
+          fontFamily: 'Georgia, serif',
+          color: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 4,
+          align: 'center',
+        }).setOrigin(0.5).setAlpha(0).setDepth(250);
+
+        this.tweens.add({
+          targets: jt,
+          alpha: 1,
+          duration: 800,
+          hold: 2500,
+          yoyo: true,
+          onComplete: () => {
+            jt.destroy();
+            this.isAnimating = false;
+            this.dialogueIndex++;
+            this.processDialogue();
+          }
+        });
+        break;
+      }
+
       case 'walk-together':
         this.walkTogether(() => {
           this.isAnimating = false;
