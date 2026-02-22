@@ -4,7 +4,6 @@
 // ============================================================
 
 import { EPISODES } from './data/episodes/index.js';
-import { BACKGROUNDS } from './data/backgrounds.js';
 import BootScene from './scenes/BootScene.js';
 import TitleScene from './scenes/TitleScene.js';
 import FinaleScene from './scenes/FinaleScene.js';
@@ -15,6 +14,7 @@ import {
   createEmbarrassedEffect, createHearts
 } from './effects/VisualEffects.js';
 import PhotoOverlay from './ui/PhotoOverlay.js';
+import BackgroundManager from './managers/BackgroundManager.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -36,6 +36,9 @@ class GameScene extends Phaser.Scene {
     this.dialogueHistory = [];
   }
 
+  // Backward compat getter for action handlers that access scene.bgLayers directly
+  get bgLayers() { return this.backgroundManager ? this.backgroundManager.layers : []; }
+
   create() {
     // Use game config dimensions directly - more reliable than camera dimensions
     const width = this.sys.game.config.width;
@@ -44,8 +47,8 @@ class GameScene extends Phaser.Scene {
     this.width = width;
     this.height = height;
 
-    // Create background container
-    this.bgLayers = [];
+    // Background manager
+    this.backgroundManager = new BackgroundManager(this);
 
     // Ground level - characters walk at the very bottom on the street
     this.groundY = height * 0.98;
@@ -269,35 +272,6 @@ class GameScene extends Phaser.Scene {
     this.startEpisode();
   }
 
-  loadBackground(bgKey) {
-    // Clear existing backgrounds
-    this.bgLayers.forEach(layer => layer.sprite.destroy());
-    this.bgLayers = [];
-
-    const config = BACKGROUNDS[bgKey];
-    if (!config) return;
-
-    config.layers.forEach((layer, index) => {
-      // Get the texture dimensions
-      const texture = this.textures.get(layer.key);
-      const frame = texture.get();
-      const texWidth = frame.width;
-      const texHeight = frame.height;
-
-      // Create tileSprite at screen size
-      const bg = this.add.tileSprite(0, 0, this.width, this.height, layer.key)
-        .setOrigin(0, 0)
-        .setScrollFactor(0)
-        .setDepth(-100 + index);
-
-      // Scale tiles to fill screen height (use tileScale, not scale)
-      const tileScale = this.height / texHeight;
-      bg.setTileScale(tileScale, tileScale);
-
-      this.bgLayers.push({ sprite: bg, speed: layer.speed, tileScale: tileScale });
-    });
-  }
-
   startEpisode() {
     const episode = EPISODES[this.currentEpisode];
     if (!episode) return;
@@ -314,7 +288,7 @@ class GameScene extends Phaser.Scene {
     this.cleanupRestaurant();
 
     // Load background
-    this.loadBackground(episode.background);
+    this.backgroundManager.load(episode.background);
 
     // Reset ALL character positions and visibility for clean slate
     // Hide everyone first, then actions will show them as needed
@@ -447,8 +421,7 @@ class GameScene extends Phaser.Scene {
 
   setupRestaurant() {
     // STEP 1: Clear parallax backgrounds
-    this.bgLayers.forEach(layer => layer.sprite.destroy());
-    this.bgLayers = [];
+    this.backgroundManager.clear();
     this.cleanupRestaurant();
     this.restaurantElements = [];
 
@@ -798,10 +771,8 @@ class GameScene extends Phaser.Scene {
       value: 200,
       duration: 2500,
       ease: 'Linear',
-      onUpdate: (tween) => {
-        this.bgLayers.forEach(layer => {
-          layer.sprite.tilePositionX += layer.speed * 1;
-        });
+      onUpdate: () => {
+        this.backgroundManager.scrollLayers(1);
       }
     });
 
@@ -1100,9 +1071,7 @@ class GameScene extends Phaser.Scene {
 
   update() {
     // Very subtle background scrolling (slowed down)
-    this.bgLayers.forEach(layer => {
-      layer.sprite.tilePositionX += layer.speed * 0.02;
-    });
+    this.backgroundManager.update();
 
     // Sync clothing overlays with base characters every frame
     this.syncClothingOverlay(this.enea, this.eneaClothes, this.currentEneaOutfit, 1);
