@@ -15,6 +15,7 @@ import {
 } from './effects/VisualEffects.js';
 import PhotoOverlay from './ui/PhotoOverlay.js';
 import BackgroundManager from './managers/BackgroundManager.js';
+import CharacterManager from './managers/CharacterManager.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -27,11 +28,6 @@ class GameScene extends Phaser.Scene {
   init(data) {
     this.currentEpisode = data.episode || 0;
     this.dialogueIndex = 0;
-    this.hasElora = false;
-    this.hasDog = false;
-    this.hasBaby = false;
-    this.hasCats = false;
-    this.hasHorse = false;
     this.isAnimating = false;
     this.dialogueHistory = [];
   }
@@ -50,91 +46,26 @@ class GameScene extends Phaser.Scene {
     // Background manager
     this.backgroundManager = new BackgroundManager(this);
 
-    // Ground level - characters walk at the very bottom on the street
-    this.groundY = height * 0.98;
-    this.dogGroundY = this.groundY - 8; // Raised so dog legs aren't lost in background ground
+    // Character manager — owns all character sprites, outfits, companions
+    this.characterManager = new CharacterManager(this);
+    this.characterManager.createAll();
 
-    // Create Enea (hidden initially, actions will show/position)
-    this.enea = this.add.sprite(width * 0.5, this.groundY, 'male')
-      .setScale(3)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
-    this.enea.setFrame(0);
-    this.eneaExpectedX = width * 0.5;
-
-    // Create Elora (hidden initially)
-    this.elora = this.add.sprite(0, this.groundY, 'female')
-      .setScale(3)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
-    this.elora.setFrame(0);
-
-    // Clothing overlay sprites (rendered on top of base characters)
-    // All overlays sync position/frame/scale/flip with base sprite every frame
-    this.eneaClothes = this.add.sprite(0, 0, 'male-split-hose')
-      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
-    this.eloraClothes = this.add.sprite(0, 0, 'female-dress-red')
-      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
-
-    // Shirt overlay (separate from body clothing — stacks on top)
-    this.eneaShirt = this.add.sprite(0, 0, 'male-shirt-blue')
-      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
-
-    // Pants overlay
-    this.eneaPants = this.add.sprite(0, 0, 'male-pants-brown')
-      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
-
-    // Boots overlay
-    this.eneaBoots = this.add.sprite(0, 0, 'male-boots')
-      .setScale(3).setOrigin(0.5, 1).setDepth(101).setVisible(false);
-
-    // Hat overlay sprites (rendered on top of clothing overlays)
-    this.eneaHat = this.add.sprite(0, 0, 'male-hat1')
-      .setScale(3).setOrigin(0.5, 1).setDepth(102).setVisible(false);
-    this.eloraHat = this.add.sprite(0, 0, 'female-hat1')
-      .setScale(3).setOrigin(0.5, 1).setDepth(102).setVisible(false);
-
-    // Dog sprite (changes texture per episode: Totoro/Joey/Marzipan)
-    this.dog = this.add.sprite(width * 0.2, this.dogGroundY, 'dog-totoro')
-      .setScale(3)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
-    this.dog.setFrame(8);
-
-    // Baby sprite (Elthen pack - hidden initially, shown in EP11)
-    this.baby = this.add.sprite(width * 0.5, this.groundY, 'baby')
-      .setScale(3)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
-    this.baby.setFrame(0);
-
-    // Cat sprites (two orange cats - same texture, cat2 flipped for variety)
-    this.cat1 = this.add.sprite(width * 0.15, this.groundY, 'cat-idle')
-      .setScale(2)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
-    this.cat1.setFrame(0);
-
-    this.cat2 = this.add.sprite(width * 0.12, this.groundY, 'cat-idle')
-      .setScale(2)
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false)
-      .setFlipX(true);
-    this.cat2.setFrame(0);
-
-    // Horse sprite (Onfe black horse - Rome)
-    this.horse = this.add.sprite(width * 0.1, this.groundY, 'horse-black')
-      .setScale(3)
-      .setOrigin(0.5, 1)
-      .setDepth(99)
-      .setVisible(false);
-    this.horse.setFrame(0);
+    // Proxy getters so action handlers can use scene.enea, scene.hasElora, etc.
+    ['enea', 'elora', 'dog', 'cat1', 'cat2', 'horse', 'baby'].forEach(key => {
+      Object.defineProperty(this, key, {
+        get() { return this.characterManager[key]; },
+        configurable: true,
+      });
+    });
+    ['hasElora', 'hasDog', 'hasBaby', 'hasCats', 'hasHorse',
+      'groundY', 'dogGroundY', 'eneaExpectedX', 'eloraExpectedX',
+    ].forEach(key => {
+      Object.defineProperty(this, key, {
+        get() { return this.characterManager[key]; },
+        set(v) { this.characterManager[key] = v; },
+        configurable: true,
+      });
+    });
 
     // Create UI layer (highest depth)
     this.uiContainer = this.add.container(0, 0).setDepth(200);
@@ -290,72 +221,8 @@ class GameScene extends Phaser.Scene {
     // Load background
     this.backgroundManager.load(episode.background);
 
-    // Reset ALL character positions and visibility for clean slate
-    // Hide everyone first, then actions will show them as needed
-    this.enea.setVisible(false);
-    this.enea.setPosition(this.width * 0.5, this.groundY);
-    this.enea.stop();
-    this.enea.setFrame(0);
-    this.enea.setScale(3); // Reset scale (restaurant changes it)
-
-    this.elora.setVisible(false);
-    this.elora.setPosition(this.width * 0.5, this.groundY);
-    this.elora.stop();
-    this.elora.setFrame(0);
-
-    // Clear tints (dinner scene may have set them)
-    this.enea.clearTint();
-    this.elora.clearTint();
-
-    // Clean up proposal ring if present (from kneel action)
-    if (this.proposalRing) { this.proposalRing.destroy(); this.proposalRing = null; }
-    if (this.proposalRingGlow) { this.proposalRingGlow.destroy(); this.proposalRingGlow = null; }
-
-    // Apply clothing overlays for this episode
-    this.applyOutfits(episode.outfits);
-
-    // Swap dog texture/scale based on story timeline
-    const dogInfo = this.getDogForEpisode(episode.id);
-    this.dog.setTexture(dogInfo.texture);
-    this.dog.setScale(dogInfo.scale);
-    if (this.anims.exists('dog-walk')) {
-      this.anims.remove('dog-walk');
-    }
-    this.anims.create({
-      key: 'dog-walk',
-      frames: this.anims.generateFrameNumbers(dogInfo.texture, { start: 8, end: 15 }),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    this.dog.setVisible(false);
-    this.dog.setPosition(this.width * 0.2, this.dogGroundY);
-    this.dog.stop();
-    this.dog.setFrame(8);
-
-    this.baby.setVisible(false);
-    this.baby.stop();
-    this.baby.setFrame(0);
-
-    // Set animal flags based on story timeline + per-episode overrides
-    // Dog: joins in EP05 (via dog-join action mid-episode), present from EP06+
-    // Some episodes override this (e.g., EP07: Joey wasn't in Rome)
-    this.hasDog = episode.id >= 6 && !episode.noDog;
-
-    // Cats: acquired in Geneva era, first confirmed EP09 (3 pet carriers to Seattle)
-    this.hasCats = episode.id >= 9;
-    this.cat1.setVisible(false);
-    this.cat1.stop();
-    this.cat1.setFrame(0);
-    this.cat2.setVisible(false);
-    this.cat2.stop();
-    this.cat2.setFrame(0);
-
-    // Horse: Rome gifted at Matthews Beach (EP10)
-    this.hasHorse = episode.id >= 10;
-    this.horse.setVisible(false);
-    this.horse.stop();
-    this.horse.setFrame(0);
+    // Reset all character positions, outfits, and companion flags
+    this.characterManager.resetForEpisode(episode);
 
     // Block input during location card display
     this.isAnimating = true;
@@ -582,13 +449,14 @@ class GameScene extends Phaser.Scene {
     this.enea.setDepth(100);   // Behind table (110)
     this.eneaExpectedX = eneaDinnerX;
     // Dinner outfit: swap to chainmail for fancy/formal look
-    this.currentEneaOutfit = 'male-chainmail';
-    this.eneaClothes.setTexture('male-chainmail');
+    const cm = this.characterManager;
+    cm.currentEneaOutfit = 'male-chainmail';
+    cm.eneaClothes.setTexture('male-chainmail');
     // No hats/shirt/pants/boots at dinner (chainmail covers everything)
-    this.currentEneaHat = null;
-    this.currentEneaShirt = null;
-    this.currentEneaPants = null;
-    this.currentEneaBoots = null;
+    cm.currentEneaHat = null;
+    cm.currentEneaShirt = null;
+    cm.currentEneaPants = null;
+    cm.currentEneaBoots = null;
 
     this.elora.setPosition(eloraDinnerX, seatY);
     this.elora.setScale(dinnerScale);
@@ -598,86 +466,13 @@ class GameScene extends Phaser.Scene {
     this.elora.setFrame(0);
     this.elora.setDepth(100);   // Behind table (110)
     // Dinner outfit: fancy blue dress
-    this.currentEloraOutfit = 'female-fancy-blue';
-    this.eloraClothes.setTexture('female-fancy-blue');
-    this.currentEloraHat = null; // No hats at dinner
+    cm.currentEloraOutfit = 'female-fancy-blue';
+    cm.eloraClothes.setTexture('female-fancy-blue');
+    cm.currentEloraHat = null; // No hats at dinner
     this.eloraExpectedX = eloraDinnerX;
 
   }
 
-  getDogForEpisode(episodeId) {
-    // EP05-06: Totoro (grey/brindle miniature bull terrier, small)
-    // EP07-09: Joey (black, small-mid)
-    // EP10-12: Marzipan (brown Belgian Malinois, mid-large)
-    if (episodeId <= 6) return { texture: 'dog-totoro', scale: 3 };
-    if (episodeId <= 9) return { texture: 'dog-joey', scale: 3 };
-    return { texture: 'dog-marzipan', scale: 4 };
-  }
-
-  applyOutfits(outfits) {
-    // Set clothing overlay textures for this episode
-    if (outfits && outfits.enea && this.textures.exists(outfits.enea)) {
-      this.eneaClothes.setTexture(outfits.enea);
-      this.currentEneaOutfit = outfits.enea;
-    } else {
-      this.currentEneaOutfit = null;
-    }
-    if (outfits && outfits.elora && this.textures.exists(outfits.elora)) {
-      this.eloraClothes.setTexture(outfits.elora);
-      this.currentEloraOutfit = outfits.elora;
-    } else {
-      this.currentEloraOutfit = null;
-    }
-    // Set hat overlay textures
-    if (outfits && outfits.eneaHat && this.textures.exists(outfits.eneaHat)) {
-      this.eneaHat.setTexture(outfits.eneaHat);
-      this.currentEneaHat = outfits.eneaHat;
-    } else {
-      this.currentEneaHat = null;
-    }
-    if (outfits && outfits.eloraHat && this.textures.exists(outfits.eloraHat)) {
-      this.eloraHat.setTexture(outfits.eloraHat);
-      this.currentEloraHat = outfits.eloraHat;
-    } else {
-      this.currentEloraHat = null;
-    }
-    // Set shirt/pants/boots overlay textures (Enea only for now)
-    if (outfits && outfits.eneaShirt && this.textures.exists(outfits.eneaShirt)) {
-      this.eneaShirt.setTexture(outfits.eneaShirt);
-      this.currentEneaShirt = outfits.eneaShirt;
-    } else {
-      this.currentEneaShirt = null;
-    }
-    if (outfits && outfits.eneaPants && this.textures.exists(outfits.eneaPants)) {
-      this.eneaPants.setTexture(outfits.eneaPants);
-      this.currentEneaPants = outfits.eneaPants;
-    } else {
-      this.currentEneaPants = null;
-    }
-    if (outfits && outfits.eneaBoots && this.textures.exists(outfits.eneaBoots)) {
-      this.eneaBoots.setTexture(outfits.eneaBoots);
-      this.currentEneaBoots = outfits.eneaBoots;
-    } else {
-      this.currentEneaBoots = null;
-    }
-  }
-
-  syncClothingOverlay(base, overlay, outfitKey, depthOffset) {
-    // Sync overlay with base character: position, frame, scale, flip, visibility, depth, alpha
-    if (!outfitKey || !base.visible) {
-      overlay.setVisible(false);
-      return;
-    }
-    overlay.setVisible(true);
-    overlay.setPosition(base.x, base.y);
-    overlay.setScale(base.scaleX, base.scaleY);
-    overlay.setFlipX(base.flipX);
-    overlay.setOrigin(base.originX, base.originY);
-    overlay.setDepth(base.depth + (depthOffset || 1));
-    overlay.setAlpha(base.alpha);
-    // Sync animation frame
-    overlay.setFrame(base.frame.name);
-  }
 
   cleanupRestaurant() {
     if (this.restaurantElements) {
@@ -688,115 +483,14 @@ class GameScene extends Phaser.Scene {
     if (this.elora) { this.elora.setDepth(100); this.elora.setScale(3); this.elora.clearTint(); }
     // Restore episode outfits (dinner scene overrides them)
     const episode = EPISODES[this.currentEpisode];
-    if (episode) this.applyOutfits(episode.outfits);
+    if (episode) this.characterManager.applyOutfits(episode.outfits);
     this.eloraCutleryFork = null;
     this.eloraCutleryKnife = null;
     this.eloraNapkin = null;
   }
 
   walkTogether(callback) {
-    const targetX = this.width * 0.7;
-
-    // Walking right, so face right
-    this.enea.setFlipX(true);
-    this.enea.play('male-walk');
-
-    if (this.hasElora) {
-      this.elora.setFlipX(true);
-      this.elora.play('female-walk');
-    }
-
-    const tweens = [
-      this.tweens.add({
-        targets: this.enea,
-        x: targetX,
-        duration: 2500,
-        ease: 'Linear'
-      })
-    ];
-
-    if (this.hasElora) {
-      tweens.push(this.tweens.add({
-        targets: this.elora,
-        x: targetX + 150,
-        duration: 2500,
-        ease: 'Linear'
-      }));
-    }
-
-    if (this.hasDog) {
-      this.dog.setFlipX(true); // Face right (walking direction)
-      this.dog.play('dog-walk');
-      tweens.push(this.tweens.add({
-        targets: this.dog,
-        x: targetX - 60,
-        duration: 2500,
-        ease: 'Linear'
-      }));
-    }
-
-    if (this.hasCats && this.cat1.visible) {
-      this.cat1.setFlipX(true);
-      this.cat2.setFlipX(false); // cat2 is already flipped, so unflip = face right
-      this.cat1.play('cat-walk-anim');
-      this.cat2.play('cat-walk-anim');
-      tweens.push(this.tweens.add({
-        targets: this.cat1,
-        x: targetX - 100,
-        duration: 2500,
-        ease: 'Linear'
-      }));
-      tweens.push(this.tweens.add({
-        targets: this.cat2,
-        x: targetX - 140,
-        duration: 2500,
-        ease: 'Linear'
-      }));
-    }
-
-    if (this.hasHorse && this.horse.visible) {
-      this.horse.setFlipX(true);
-      this.horse.play('horse-walk');
-      tweens.push(this.tweens.add({
-        targets: this.horse,
-        x: targetX - 220,
-        duration: 2500,
-        ease: 'Linear'
-      }));
-    }
-
-    // Scroll background (slower, more comfortable)
-    this.tweens.add({
-      targets: { value: 0 },
-      value: 200,
-      duration: 2500,
-      ease: 'Linear',
-      onUpdate: () => {
-        this.backgroundManager.scrollLayers(1);
-      }
-    });
-
-    this.time.delayedCall(2500, () => {
-      this.enea.stop();
-      this.enea.setFrame(0);
-      if (this.hasElora) {
-        this.elora.stop();
-        this.elora.setFrame(0);
-      }
-      if (this.hasDog) {
-        this.dog.stop();
-        this.dog.setFrame(8);
-      }
-      if (this.hasCats && this.cat1.visible) {
-        this.cat1.play('cat-idle-anim');
-        this.cat2.play('cat-idle-anim');
-      }
-      if (this.hasHorse && this.horse.visible) {
-        this.horse.stop();
-        this.horse.setFrame(0);
-      }
-      callback();
-    });
+    this.characterManager.walkTogether(callback);
   }
 
   showSpeech(speaker, text, effect) {
@@ -1074,15 +768,7 @@ class GameScene extends Phaser.Scene {
     this.backgroundManager.update();
 
     // Sync clothing overlays with base characters every frame
-    this.syncClothingOverlay(this.enea, this.eneaClothes, this.currentEneaOutfit, 1);
-    this.syncClothingOverlay(this.elora, this.eloraClothes, this.currentEloraOutfit, 1);
-    // Sync shirt/pants/boots overlays (same depth offset as clothing - no overlap between them)
-    this.syncClothingOverlay(this.enea, this.eneaShirt, this.currentEneaShirt, 1);
-    this.syncClothingOverlay(this.enea, this.eneaPants, this.currentEneaPants, 1);
-    this.syncClothingOverlay(this.enea, this.eneaBoots, this.currentEneaBoots, 1);
-    // Sync hat overlays (depth +2 above base, so above clothing)
-    this.syncClothingOverlay(this.enea, this.eneaHat, this.currentEneaHat, 2);
-    this.syncClothingOverlay(this.elora, this.eloraHat, this.currentEloraHat, 2);
+    this.characterManager.syncClothing();
 
     // Debug overlay (toggle with D key)
     if (this.debugEnabled && this.debugText) {
@@ -1104,8 +790,9 @@ class GameScene extends Phaser.Scene {
       // Scene state
       lines.push(`Photo: ${this.photoOverlay.visible ? `OPEN ${this.photoOverlay.currentPhotoIndex + 1}/${this.photoOverlay.currentPhotos.length}` : 'closed'} | Restaurant: ${this.restaurantElements ? `active (${this.restaurantElements.length} els)` : 'none'}`);
       // Outfits
-      lines.push(`E outfit: ${this.currentEneaOutfit || '-'} shirt:${this.currentEneaShirt || '-'} pants:${this.currentEneaPants || '-'} boots:${this.currentEneaBoots || '-'} hat:${this.currentEneaHat || '-'}`);
-      lines.push(`L outfit: ${this.currentEloraOutfit || '-'} hat:${this.currentEloraHat || '-'}`);
+      const cm = this.characterManager;
+      lines.push(`E outfit: ${cm.currentEneaOutfit || '-'} shirt:${cm.currentEneaShirt || '-'} pants:${cm.currentEneaPants || '-'} boots:${cm.currentEneaBoots || '-'} hat:${cm.currentEneaHat || '-'}`);
+      lines.push(`L outfit: ${cm.currentEloraOutfit || '-'} hat:${cm.currentEloraHat || '-'}`);
       // BG layers
       lines.push(`BG layers: ${this.bgLayers.length} | Speech: ${this.speechBubble.visible ? 'showing' : 'hidden'}`);
       // Cutlery state if restaurant active
@@ -1150,11 +837,14 @@ if (typeof window !== 'undefined') {
     },
     getFlags: () => {
       const gameScene = game.scene.getScene('GameScene');
-      if (!gameScene) return { hasElora: false, hasDog: false, hasBaby: false };
+      const cm = gameScene?.characterManager;
+      if (!cm) return { hasElora: false, hasDog: false, hasBaby: false, hasCats: false, hasHorse: false };
       return {
-        hasElora: gameScene.hasElora || false,
-        hasDog: gameScene.hasDog || false,
-        hasBaby: gameScene.hasBaby || false
+        hasElora: cm.hasElora || false,
+        hasDog: cm.hasDog || false,
+        hasBaby: cm.hasBaby || false,
+        hasCats: cm.hasCats || false,
+        hasHorse: cm.hasHorse || false,
       };
     },
     isAnimating: () => {
