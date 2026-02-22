@@ -434,6 +434,18 @@ if (typeof window !== 'undefined') {
     isAnimating: () => {
       const gameScene = game.scene.getScene('GameScene');
       return gameScene ? gameScene.isAnimating : false;
-    }
+    },
+    getHistoryLength: () => {
+      const gameScene = game.scene.getScene('GameScene');
+      return gameScene ? gameScene.dialogueHistory.length : 0;
+    },
+    skipToEpisode: (index) => {
+      const gameScene = game.scene.getScene('GameScene');
+      if (gameScene) gameScene.skipToEpisode(index);
+    },
+    goBack: () => {
+      const gameScene = game.scene.getScene('GameScene');
+      if (gameScene) gameScene.goBack();
+    },
   };
 }
