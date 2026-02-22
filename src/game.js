@@ -1421,7 +1421,18 @@ class GameScene extends Phaser.Scene {
           eloraY: this.elora.y,
           eloraVisible: this.elora.visible,
           eloraFlipX: this.elora.flipX,
-          eloraExpectedX: this.eloraExpectedX
+          eloraExpectedX: this.eloraExpectedX,
+          dogVisible: this.dog.visible,
+          dogX: this.dog.x,
+          dogY: this.dog.y,
+          cat1Visible: this.cat1.visible,
+          cat1X: this.cat1.x,
+          cat2Visible: this.cat2.visible,
+          cat2X: this.cat2.x,
+          horseVisible: this.horse.visible,
+          horseX: this.horse.x,
+          babyVisible: this.baby.visible,
+          babyX: this.baby.x,
         });
       }
     }
@@ -1459,6 +1470,18 @@ class GameScene extends Phaser.Scene {
     this.elora.stop();
     this.elora.setFrame(0);
     this.eloraExpectedX = prevState.eloraExpectedX;
+
+    // Restore companion state
+    this.dog.setPosition(prevState.dogX, prevState.dogY);
+    this.dog.setVisible(prevState.dogVisible);
+    this.cat1.setPosition(prevState.cat1X, this.cat1.y);
+    this.cat1.setVisible(prevState.cat1Visible);
+    this.cat2.setPosition(prevState.cat2X, this.cat2.y);
+    this.cat2.setVisible(prevState.cat2Visible);
+    this.horse.setPosition(prevState.horseX, this.horse.y);
+    this.horse.setVisible(prevState.horseVisible);
+    this.baby.setPosition(prevState.babyX, this.baby.y);
+    this.baby.setVisible(prevState.babyVisible);
 
     // Go back to previous dialogue
     this.dialogueIndex = prevState.index;

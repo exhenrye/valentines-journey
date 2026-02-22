@@ -133,8 +133,8 @@ export function babyArrive(scene, dialogue) {
 }
 
 export function restaurantScene(scene, dialogue) {
-  // Kill any active tweens (e.g. walkTogether) before restaurant setup
-  scene.tweens.killAll();
+  // Kill character movement tweens before restaurant setup (not all tweens)
+  scene.tweens.killTweensOf([scene.enea, scene.elora, scene.dog]);
   // Transition to restaurant interior
   scene.setupRestaurant();
   scene.isAnimating = false;

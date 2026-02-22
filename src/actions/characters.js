@@ -2,7 +2,7 @@ export function eneaWaitRight(scene, dialogue) {
   // Explicitly position Enea at 70% width, facing left
   const waitRightX = scene.width * 0.7;
   scene.enea.setPosition(waitRightX, scene.groundY);
-  scene.enea.setFlipX(true); // Face left toward where Elora will appear
+  scene.enea.setFlipX(false); // Face left toward where Elora will appear
   scene.enea.setVisible(true);
   scene.enea.setAlpha(1);
   scene.enea.stop();
