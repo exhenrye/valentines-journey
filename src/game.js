@@ -14,6 +14,7 @@ import {
   createBlushEffect, clearBlushEffect, createHeartFlutterEffect,
   createEmbarrassedEffect, createHearts
 } from './effects/VisualEffects.js';
+import PhotoOverlay from './ui/PhotoOverlay.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -245,77 +246,7 @@ class GameScene extends Phaser.Scene {
     this.heartsContainer = this.add.container(0, 0);
 
     // Photo moment overlay
-    this.photoOverlay = this.add.container(0, 0).setDepth(300);
-    this.photoOverlay.setVisible(false);
-    this.currentPhotoIndex = 0;
-    this.currentPhotos = [];
-
-    const photoBg = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.95);
-    this.photoTitle = this.add.text(width / 2, height * 0.08, '', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '36px',
-      color: '#ffcdd2'
-    }).setOrigin(0.5);
-    this.photoDate = this.add.text(width / 2, height * 0.13, '', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '16px',
-      color: '#999999',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-
-    // Photo display area (will hold actual image or icon)
-    this.photoImage = null; // Will be created dynamically
-    this.photoIcon = this.add.text(width / 2, height * 0.42, '', {
-      fontSize: '96px'
-    }).setOrigin(0.5);
-
-    // Photo counter (e.g., "1 / 4")
-    this.photoCounter = this.add.text(width / 2, height * 0.72, '', {
-      fontFamily: 'Lato',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
-
-    this.photoCaption = this.add.text(width / 2, height * 0.78, '', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '16px',
-      color: '#cccccc',
-      fontStyle: 'italic',
-      align: 'center',
-      wordWrap: { width: 600 }
-    }).setOrigin(0.5);
-
-    // Navigation arrows for slideshow
-    this.prevPhotoBtn = this.add.text(width * 0.1, height * 0.42, '◀', {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setAlpha(0.7);
-    this.prevPhotoBtn.on('pointerdown', () => { this._photoClickHandled = true; this.showPrevPhoto(); });
-    this.prevPhotoBtn.on('pointerover', () => this.prevPhotoBtn.setAlpha(1));
-    this.prevPhotoBtn.on('pointerout', () => this.prevPhotoBtn.setAlpha(0.7));
-
-    this.nextPhotoBtn = this.add.text(width * 0.9, height * 0.42, '▶', {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setAlpha(0.7);
-    this.nextPhotoBtn.on('pointerdown', () => { this._photoClickHandled = true; this.showNextPhoto(); });
-    this.nextPhotoBtn.on('pointerover', () => this.nextPhotoBtn.setAlpha(1));
-    this.nextPhotoBtn.on('pointerout', () => this.nextPhotoBtn.setAlpha(0.7));
-
-    const continueBtn = this.add.rectangle(width / 2, height * 0.92, 250, 45, 0x000000, 0)
-      .setStrokeStyle(2, 0xe57373)
-      .setInteractive({ useHandCursor: true });
-    const continueBtnText = this.add.text(width / 2, height * 0.92, 'Continue →', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-
-    continueBtn.on('pointerdown', () => { this._photoClickHandled = true; this.closePhoto(); });
-    continueBtn.on('pointerover', () => continueBtn.setFillStyle(0xe57373, 1));
-    continueBtn.on('pointerout', () => continueBtn.setFillStyle(0x000000, 0));
-
-    this.photoOverlay.add([photoBg, this.photoTitle, this.photoDate, this.photoIcon, this.photoCounter, this.photoCaption, this.prevPhotoBtn, this.nextPhotoBtn, continueBtn, continueBtnText]);
+    this.photoOverlay = new PhotoOverlay(this);
 
     // Input handling
     this.input.on('pointerdown', () => this.handleInput());
@@ -1006,146 +937,30 @@ class GameScene extends Phaser.Scene {
   showPhoto() {
     const episode = EPISODES[this.currentEpisode];
 
-    this.photoTitle.setText(episode.name);
-    this.photoDate.setText(episode.date);
-    this.photoCaption.setText(episode.caption);
-
-    // Check if episode has actual photos
-    if (episode.photos && episode.photos.length > 0) {
-      this.currentPhotos = episode.photos;
-      this.currentPhotoIndex = 0;
-      this.photoIcon.setVisible(false);
-      this.displayCurrentPhoto();
-
-      // Show/hide navigation based on photo count
-      const hasMultiple = this.currentPhotos.length > 1;
-      this.prevPhotoBtn.setVisible(false);
-      this.prevPhotoBtn.disableInteractive();
-      this.nextPhotoBtn.setVisible(hasMultiple);
-      if (hasMultiple) this.nextPhotoBtn.setInteractive(); else this.nextPhotoBtn.disableInteractive();
-      this.photoCounter.setVisible(hasMultiple);
-    } else {
-      // No photos - show icon instead
-      this.currentPhotos = [];
-      this.photoIcon.setText(episode.icon);
-      this.photoIcon.setVisible(true);
-      this.prevPhotoBtn.setVisible(false);
-      this.prevPhotoBtn.disableInteractive();
-      this.nextPhotoBtn.setVisible(false);
-      this.nextPhotoBtn.disableInteractive();
-      this.photoCounter.setVisible(false);
-      if (this.photoImage) {
-        this.photoImage.destroy();
-        this.photoImage = null;
-      }
-    }
-
-    this.photoOverlay.setVisible(true);
-    this.photoOverlay.setAlpha(0);
-
-    this.tweens.add({
-      targets: this.photoOverlay,
-      alpha: 1,
-      duration: 500
-    });
-
     this.hideSpeech();
 
     // Handle unlock
     if (episode.unlock === 'elora') this.hasElora = true;
     if (episode.unlock === 'dog') this.hasDog = true;
     if (episode.unlock === 'baby') this.hasBaby = true;
-  }
 
-  displayCurrentPhoto() {
-    const episode = EPISODES[this.currentEpisode];
-    const photoKey = `photo-${episode.id}-${this.currentPhotoIndex}`;
+    this.photoOverlay.show(episode, () => {
+      // Episode progression after photo closes
+      const hasFinale = episode.dialogue.some(d => d.action === 'finale');
 
-    // Remove old photo image if exists
-    if (this.photoImage) {
-      this.photoImage.destroy();
-      this.photoImage = null;
-    }
-
-    // Check if texture exists
-    if (this.textures.exists(photoKey)) {
-      this.photoImage = this.add.image(this.width / 2, this.height * 0.42, photoKey);
-
-      // Scale to fit within bounds (max 500x350)
-      const maxWidth = 500;
-      const maxHeight = 350;
-      const scaleX = maxWidth / this.photoImage.width;
-      const scaleY = maxHeight / this.photoImage.height;
-      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up
-      this.photoImage.setScale(scale);
-
-      // Add to overlay container
-      this.photoOverlay.add(this.photoImage);
-    }
-
-    // Update counter
-    this.photoCounter.setText(`${this.currentPhotoIndex + 1} / ${this.currentPhotos.length}`);
-
-    // Show/hide arrows based on position in slideshow — also toggle interactivity
-    if (this.currentPhotos.length > 1) {
-      const showPrev = this.currentPhotoIndex > 0;
-      const showNext = this.currentPhotoIndex < this.currentPhotos.length - 1;
-      this.prevPhotoBtn.setVisible(showPrev);
-      this.nextPhotoBtn.setVisible(showNext);
-      if (showPrev) this.prevPhotoBtn.setInteractive(); else this.prevPhotoBtn.disableInteractive();
-      if (showNext) this.nextPhotoBtn.setInteractive(); else this.nextPhotoBtn.disableInteractive();
-    }
-  }
-
-  showNextPhoto() {
-    if (this.currentPhotos.length === 0) return;
-    if (this.currentPhotoIndex >= this.currentPhotos.length - 1) return; // Don't cycle past last
-    this.currentPhotoIndex++;
-    this.displayCurrentPhoto();
-  }
-
-  showPrevPhoto() {
-    if (this.currentPhotos.length === 0) return;
-    if (this.currentPhotoIndex <= 0) return; // Don't cycle past first
-    this.currentPhotoIndex--;
-    this.displayCurrentPhoto();
-  }
-
-  closePhoto() {
-    this.tweens.add({
-      targets: this.photoOverlay,
-      alpha: 0,
-      duration: 500,
-      onComplete: () => {
-        this.photoOverlay.setVisible(false);
-
-        // Clean up photo image
-        if (this.photoImage) {
-          this.photoImage.destroy();
-          this.photoImage = null;
-        }
-        this.currentPhotos = [];
-        this.currentPhotoIndex = 0;
-
-        // Check for finale
-        const episode = EPISODES[this.currentEpisode];
-        const hasFinale = episode.dialogue.some(d => d.action === 'finale');
-
-        if (hasFinale) {
-          this.cameras.main.fadeOut(1000, 0, 0, 0);
-          this.time.delayedCall(1000, () => {
-            this.scene.start('FinaleScene');
+      if (hasFinale) {
+        this.cameras.main.fadeOut(1000, 0, 0, 0);
+        this.time.delayedCall(1000, () => {
+          this.scene.start('FinaleScene');
+        });
+      } else {
+        this.currentEpisode++;
+        if (this.currentEpisode < EPISODES.length) {
+          this.cameras.main.fadeOut(500, 0, 0, 0);
+          this.time.delayedCall(500, () => {
+            this.cameras.main.fadeIn(500, 0, 0, 0);
+            this.startEpisode();
           });
-        } else {
-          // Next episode
-          this.currentEpisode++;
-          if (this.currentEpisode < EPISODES.length) {
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.time.delayedCall(500, () => {
-              this.cameras.main.fadeIn(500, 0, 0, 0);
-              this.startEpisode();
-            });
-          }
         }
       }
     });
@@ -1318,7 +1133,7 @@ class GameScene extends Phaser.Scene {
         lines.push(`Baby:  vis=true pos=(${Math.round(this.baby.x)},${Math.round(this.baby.y)}) sc=${this.baby.scale.toFixed(1)}`);
       }
       // Scene state
-      lines.push(`Photo: ${this.photoOverlay.visible ? `OPEN ${this.currentPhotoIndex + 1}/${this.currentPhotos.length}` : 'closed'} | Restaurant: ${this.restaurantElements ? `active (${this.restaurantElements.length} els)` : 'none'}`);
+      lines.push(`Photo: ${this.photoOverlay.visible ? `OPEN ${this.photoOverlay.currentPhotoIndex + 1}/${this.photoOverlay.currentPhotos.length}` : 'closed'} | Restaurant: ${this.restaurantElements ? `active (${this.restaurantElements.length} els)` : 'none'}`);
       // Outfits
       lines.push(`E outfit: ${this.currentEneaOutfit || '-'} shirt:${this.currentEneaShirt || '-'} pants:${this.currentEneaPants || '-'} boots:${this.currentEneaBoots || '-'} hat:${this.currentEneaHat || '-'}`);
       lines.push(`L outfit: ${this.currentEloraOutfit || '-'} hat:${this.currentEloraHat || '-'}`);
