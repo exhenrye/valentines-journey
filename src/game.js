@@ -9,6 +9,11 @@ import BootScene from './scenes/BootScene.js';
 import TitleScene from './scenes/TitleScene.js';
 import FinaleScene from './scenes/FinaleScene.js';
 import { ACTION_HANDLERS } from './actions/index.js';
+import {
+  createHeartGraphic, createPixelPlane,
+  createBlushEffect, clearBlushEffect, createHeartFlutterEffect,
+  createEmbarrassedEffect, createHearts
+} from './effects/VisualEffects.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -232,7 +237,7 @@ class GameScene extends Phaser.Scene {
     this.dialogueHistory = [];
 
     // Plane for flying animation (drawn pixel art, no emoji)
-    this.plane = this.createPixelPlane();
+    this.plane = createPixelPlane(this);
     this.plane.setPosition(-100, height * 0.3);
     this.plane.setVisible(false);
 
@@ -978,11 +983,11 @@ class GameScene extends Phaser.Scene {
 
     // Handle special effects
     if (effect === 'blush') {
-      this.createBlushEffect();
+      createBlushEffect(this);
     } else if (effect === 'heart-flutter') {
-      this.createHeartFlutterEffect();
+      createHeartFlutterEffect(this);
     } else if (effect === 'embarrassed') {
-      this.createEmbarrassedEffect();
+      createEmbarrassedEffect(this);
     }
 
     this.continuePrompt.setVisible(true);
@@ -991,257 +996,11 @@ class GameScene extends Phaser.Scene {
     this.isAnimating = false;
   }
 
-  // Draw a heart shape using graphics (Phaser 3 compatible - no bezier)
-  createHeartGraphic(x, y, size, color) {
-    // Use pixel-art heart texture instead of drawn shapes
-    const scale = size / 8; // 16px texture, so size 16 = scale 2
-    const heart = this.add.image(x, y, 'heart-pixel')
-      .setScale(scale)
-      .setOrigin(0.5, 0.5);
-    if (color && color !== 0xe57373) {
-      heart.setTint(color);
-    }
-    return heart;
-  }
-
-  // Draw a pixel-art airplane using Phaser Graphics (no emoji)
-  createPixelPlane() {
-    // Pixel-art plane from canvas texture — matches game's pixel aesthetic
-    const plane = this.add.image(0, 0, 'plane-pixel')
-      .setDepth(200)
-      .setScale(4);
-    return plane;
-  }
-
-  createBlushEffect() {
-    // Create blush marks near both characters' faces
-    const blushMarks = [];
-
-    // Use expected positions as fallback
-    const eneaX = this.enea.x > 100 ? this.enea.x : (this.eneaExpectedX || this.width * 0.7);
-    const eloraX = this.elora.x > 100 ? this.elora.x : (this.eloraExpectedX || this.width * 0.35);
-
-    // Blush for Enea (right side of screen)
-    const eneaBlush = this.add.text(eneaX + 15, this.groundY - 140, '///', {
-      fontSize: '18px',
-      color: '#ffb6c1'
-    }).setOrigin(0.5).setAlpha(0).setDepth(150).setRotation(-0.2);
-
-    // Blush for Elora (left side of screen)
-    const eloraBlush = this.add.text(eloraX - 15, this.groundY - 140, '///', {
-      fontSize: '18px',
-      color: '#ffb6c1'
-    }).setOrigin(0.5).setAlpha(0).setDepth(150).setRotation(0.2);
-
-    blushMarks.push(eneaBlush, eloraBlush);
-
-    // Store reference to clear later
-    this.currentBlushMarks = blushMarks;
-
-    // Fade in with gentle wobble
-    blushMarks.forEach((blush, i) => {
-      this.tweens.add({
-        targets: blush,
-        alpha: 0.8,
-        duration: 300,
-        delay: i * 100
-      });
-
-      // Subtle wobble
-      this.tweens.add({
-        targets: blush,
-        y: blush.y - 3,
-        duration: 600,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
-    });
-  }
-
-  clearBlushEffect() {
-    if (this.currentBlushMarks) {
-      this.currentBlushMarks.forEach(blush => {
-        this.tweens.add({
-          targets: blush,
-          alpha: 0,
-          duration: 300,
-          onComplete: () => blush.destroy()
-        });
-      });
-      this.currentBlushMarks = null;
-    }
-  }
-
-  createHeartFlutterEffect() {
-    // Small hearts floating near Enea (for his internal monologue)
-    const eneaX = this.enea.x > 100 ? this.enea.x : (this.eneaExpectedX || this.width * 0.7);
-
-    for (let i = 0; i < 3; i++) {
-      const heart = this.add.image(
-        eneaX - 20 + i * 18,
-        this.groundY - 120 - i * 15,
-        'heart-pixel'
-      ).setScale(0.8 + i * 0.2).setAlpha(0).setDepth(150);
-
-      this.tweens.add({
-        targets: heart,
-        alpha: 0.8,
-        y: heart.y - 40,
-        duration: 800,
-        delay: i * 200,
-        ease: 'Sine.easeOut',
-        onComplete: () => {
-          this.tweens.add({
-            targets: heart,
-            alpha: 0,
-            y: heart.y - 20,
-            duration: 400,
-            onComplete: () => heart.destroy()
-          });
-        }
-      });
-    }
-  }
-
-  createEmbarrassedEffect() {
-    const eloraX = this.elora.x > 100 ? this.elora.x : (this.eloraExpectedX || this.width * 0.6);
-    const eloraY = this.elora.y;
-    const embarrassedMarks = [];
-
-    // Blush on Elora (position relative to character, not groundY)
-    const eloraBlush = this.add.text(eloraX - 15, eloraY - 140, '///', {
-      fontSize: '20px',
-      color: '#ff9999'
-    }).setOrigin(0.5).setAlpha(0).setDepth(150).setRotation(0.2);
-    embarrassedMarks.push(eloraBlush);
-
-    // Exclamation mark above head
-    const exclaim = this.add.text(eloraX, eloraY - 180, '!', {
-      fontSize: '32px',
-      fontStyle: 'bold',
-      color: '#ff6666'
-    }).setOrigin(0.5).setAlpha(0).setDepth(150);
-    embarrassedMarks.push(exclaim);
-
-    // Store for cleanup
-    this.currentBlushMarks = embarrassedMarks;
-
-    // Animate blush in
-    this.tweens.add({
-      targets: eloraBlush,
-      alpha: 0.9,
-      duration: 150
-    });
-
-    // Exclamation pop
-    this.tweens.add({
-      targets: exclaim,
-      alpha: 1,
-      y: exclaim.y - 10,
-      duration: 200,
-      ease: 'Back.easeOut'
-    });
-    this.tweens.add({
-      targets: exclaim,
-      rotation: 0.1,
-      duration: 100,
-      yoyo: true,
-      repeat: 3
-    });
-
-    // === FLYING CUTLERY + NAPKIN from the table ===
-    if (this.eloraCutleryFork && this.eloraCutleryKnife) {
-      // Fork flies up-right with spin
-      this.eloraCutleryFork.setDepth(150);
-      this.tweens.add({
-        targets: this.eloraCutleryFork,
-        x: this.eloraCutleryFork.x + 140,
-        y: this.eloraCutleryFork.y - 220,
-        angle: 360 * 4,
-        alpha: 0,
-        duration: 1000,
-        ease: 'Sine.easeOut'
-      });
-
-      // Knife flies up-left with spin
-      this.eloraCutleryKnife.setDepth(150);
-      this.tweens.add({
-        targets: this.eloraCutleryKnife,
-        x: this.eloraCutleryKnife.x - 100,
-        y: this.eloraCutleryKnife.y - 180,
-        angle: -360 * 3,
-        alpha: 0,
-        duration: 900,
-        delay: 100,
-        ease: 'Sine.easeOut'
-      });
-
-      // Napkin tumbles away
-      if (this.eloraNapkin) {
-        this.eloraNapkin.setDepth(150);
-        this.tweens.add({
-          targets: this.eloraNapkin,
-          x: this.eloraNapkin.x + 80,
-          y: this.eloraNapkin.y - 160,
-          angle: 360 * 3,
-          alpha: 0,
-          scaleX: 5,
-          scaleY: 5,
-          duration: 1200,
-          delay: 50,
-          ease: 'Sine.easeOut'
-        });
-      }
-    }
-  }
-
   hideSpeech() {
     this.speechBubble.setVisible(false);
     this.continuePrompt.setVisible(false);
     this.backButton.setVisible(false);
-    this.clearBlushEffect();
-  }
-
-  createHearts() {
-    const colors = [0xe57373, 0xef5350, 0xf48fb1, 0xff8a80, 0xce93d8];
-    const centerX = (this.enea.x + this.elora.x) / 2 || this.width * 0.5;
-
-    for (let i = 0; i < 20; i++) {
-      const startX = centerX - 120 + Math.random() * 240;
-      const startY = this.groundY - 40 + Math.random() * 40;
-      const scale = 1.2 + Math.random() * 1.8;
-      const color = colors[Math.floor(Math.random() * colors.length)];
-
-      const heart = this.add.image(startX, startY, 'heart-pixel')
-        .setScale(0.1)
-        .setDepth(200)
-        .setAlpha(0.9)
-        .setTint(color);
-
-      // Staggered pop-in, float up with gentle sway, then fade
-      const delay = i * 80;
-      const swayDir = Math.random() > 0.5 ? 1 : -1;
-
-      this.tweens.add({
-        targets: heart,
-        scale: scale,
-        duration: 300,
-        delay: delay,
-        ease: 'Back.easeOut',
-      });
-
-      this.tweens.add({
-        targets: heart,
-        y: startY - 180 - Math.random() * 120,
-        x: startX + swayDir * (20 + Math.random() * 40),
-        alpha: 0,
-        duration: 1600 + Math.random() * 600,
-        delay: delay + 200,
-        ease: 'Sine.easeIn',
-        onComplete: () => heart.destroy()
-      });
-    }
+    clearBlushEffect(this);
   }
 
   showPhoto() {

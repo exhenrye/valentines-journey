@@ -1,4 +1,5 @@
 import { EPISODES } from '../data/episodes/index.js';
+import { createHeart } from '../effects/VisualEffects.js';
 
 class FinaleScene extends Phaser.Scene {
   constructor() {
@@ -18,7 +19,7 @@ class FinaleScene extends Phaser.Scene {
     for (let i = 0; i < 3; i++) {
       const heartX = width / 2 - 80 + i * 80;
       const heartY = 80;
-      const heart = this.createHeart(heartX, heartY, 24, 0xe57373);
+      const heart = createHeart(this, heartX, heartY, 24, 0xe57373);
 
       this.tweens.add({
         targets: heart,
@@ -116,12 +117,6 @@ class FinaleScene extends Phaser.Scene {
     this.cameras.main.fadeIn(1000, 0, 0, 0);
   }
 
-  createHeart(x, y, size, color) {
-    const scale = size / 8;
-    const heart = this.add.image(x, y, 'heart-pixel').setScale(scale);
-    if (color && color !== 0xe57373) heart.setTint(color);
-    return heart;
-  }
 }
 
 export default FinaleScene;

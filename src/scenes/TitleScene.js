@@ -1,4 +1,5 @@
 import { BACKGROUNDS } from '../data/backgrounds.js';
+import { createHeart } from '../effects/VisualEffects.js';
 
 class TitleScene extends Phaser.Scene {
   constructor() {
@@ -35,7 +36,7 @@ class TitleScene extends Phaser.Scene {
     for (let i = 0; i < 2; i++) {
       const heartX = width / 2 - 50 + i * 100;
       const heartY = height / 2 - 150;
-      const heart = this.createHeart(heartX, heartY, 24, 0xe57373);
+      const heart = createHeart(this, heartX, heartY, 24, 0xe57373);
 
       this.tweens.add({
         targets: heart,
@@ -133,12 +134,6 @@ class TitleScene extends Phaser.Scene {
     });
   }
 
-  createHeart(x, y, size, color) {
-    const scale = size / 8;
-    const heart = this.add.image(x, y, 'heart-pixel').setScale(scale);
-    if (color && color !== 0xe57373) heart.setTint(color);
-    return heart;
-  }
 }
 
 export default TitleScene;

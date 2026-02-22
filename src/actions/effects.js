@@ -1,3 +1,5 @@
+import { createHeartGraphic, createHearts } from '../effects/VisualEffects.js';
+
 export function wait(scene, dialogue) {
   scene.showSpeech(dialogue.speaker, dialogue.text);
 }
@@ -23,7 +25,7 @@ export function lookAtEachOther(scene, dialogue) {
   // Create a drawn heart that floats up between them
   const heartX = (lookEneaX + lookEloraX) / 2;
   const heartY = scene.groundY - 100;
-  const floatingHeart = scene.createHeartGraphic(heartX, heartY, 20, 0xe57373);
+  const floatingHeart = createHeartGraphic(scene, heartX, heartY, 20, 0xe57373);
   floatingHeart.setAlpha(0).setDepth(150);
 
   // Fade in and float up
@@ -53,7 +55,7 @@ export function lookAtEachOther(scene, dialogue) {
 }
 
 export function hearts(scene, dialogue) {
-  scene.createHearts();
+  createHearts(scene);
   scene.time.delayedCall(2000, () => {
     scene.isAnimating = false;
     scene.dialogueIndex++;

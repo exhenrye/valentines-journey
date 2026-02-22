@@ -1,3 +1,5 @@
+import { createHearts } from '../effects/VisualEffects.js';
+
 export function eneaWaitRight(scene, dialogue) {
   // Explicitly position Enea at 70% width, facing left
   const waitRightX = scene.width * 0.7;
@@ -225,7 +227,7 @@ export function embrace(scene, dialogue) {
       scene.elora.setFrame(0);
 
       // Hearts while they're close together
-      scene.createHearts();
+      createHearts(scene);
 
       // Phase 2: Hold close for a moment, then separate to conversation distance
       const eneaSepX = eneaIsLeft ? meetX - convGap : meetX + convGap;
