@@ -151,43 +151,44 @@ export function createEmbarrassedEffect(scene) {
   });
 
   // Flying cutlery + napkin from the table
-  if (scene.eloraCutleryFork && scene.eloraCutleryKnife) {
-    scene.eloraCutleryFork.setDepth(150);
+  const rest = scene.restaurant;
+  if (rest && rest.eloraCutleryFork && rest.eloraCutleryKnife) {
+    rest.eloraCutleryFork.setDepth(150);
     scene.tweens.add({
-      targets: scene.eloraCutleryFork,
-      x: scene.eloraCutleryFork.x + 140,
-      y: scene.eloraCutleryFork.y - 220,
+      targets: rest.eloraCutleryFork,
+      x: rest.eloraCutleryFork.x + 140,
+      y: rest.eloraCutleryFork.y - 220,
       angle: 360 * 4,
       alpha: 0,
       duration: 1000,
-      ease: 'Sine.easeOut'
+      ease: 'Sine.easeOut',
     });
 
-    scene.eloraCutleryKnife.setDepth(150);
+    rest.eloraCutleryKnife.setDepth(150);
     scene.tweens.add({
-      targets: scene.eloraCutleryKnife,
-      x: scene.eloraCutleryKnife.x - 100,
-      y: scene.eloraCutleryKnife.y - 180,
+      targets: rest.eloraCutleryKnife,
+      x: rest.eloraCutleryKnife.x - 100,
+      y: rest.eloraCutleryKnife.y - 180,
       angle: -360 * 3,
       alpha: 0,
       duration: 900,
       delay: 100,
-      ease: 'Sine.easeOut'
+      ease: 'Sine.easeOut',
     });
 
-    if (scene.eloraNapkin) {
-      scene.eloraNapkin.setDepth(150);
+    if (rest.eloraNapkin) {
+      rest.eloraNapkin.setDepth(150);
       scene.tweens.add({
-        targets: scene.eloraNapkin,
-        x: scene.eloraNapkin.x + 80,
-        y: scene.eloraNapkin.y - 160,
+        targets: rest.eloraNapkin,
+        x: rest.eloraNapkin.x + 80,
+        y: rest.eloraNapkin.y - 160,
         angle: 360 * 3,
         alpha: 0,
         scaleX: 5,
         scaleY: 5,
         duration: 1200,
         delay: 50,
-        ease: 'Sine.easeOut'
+        ease: 'Sine.easeOut',
       });
     }
   }
