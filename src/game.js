@@ -14,6 +14,8 @@ import {
   createEmbarrassedEffect, createHearts
 } from './effects/VisualEffects.js';
 import PhotoOverlay from './ui/PhotoOverlay.js';
+import SpeechBubble from './ui/SpeechBubble.js';
+import GameUI from './ui/GameUI.js';
 import BackgroundManager from './managers/BackgroundManager.js';
 import CharacterManager from './managers/CharacterManager.js';
 
@@ -67,106 +69,15 @@ class GameScene extends Phaser.Scene {
       });
     });
 
-    // Create UI layer (highest depth)
-    this.uiContainer = this.add.container(0, 0).setDepth(200);
-
-    // Episode indicator with skip buttons
-    this.prevEpisodeBtn = this.add.text(width / 2 - 140, 30, '◀◀', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 10, y: 8 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.prevEpisodeBtn.on('pointerdown', () => this.skipToEpisode(this.currentEpisode - 1));
-    this.prevEpisodeBtn.on('pointerover', () => this.prevEpisodeBtn.setBackgroundColor('#444444cc'));
-    this.prevEpisodeBtn.on('pointerout', () => this.prevEpisodeBtn.setBackgroundColor('#00000088'));
-    this.uiContainer.add(this.prevEpisodeBtn);
-
-    this.episodeText = this.add.text(width / 2, 30, '', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 15, y: 8 }
-    }).setOrigin(0.5);
-    this.uiContainer.add(this.episodeText);
-
-    this.nextEpisodeBtn = this.add.text(width / 2 + 140, 30, '▶▶', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 10, y: 8 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.nextEpisodeBtn.on('pointerdown', () => this.skipToEpisode(this.currentEpisode + 1));
-    this.nextEpisodeBtn.on('pointerover', () => this.nextEpisodeBtn.setBackgroundColor('#444444cc'));
-    this.nextEpisodeBtn.on('pointerout', () => this.nextEpisodeBtn.setBackgroundColor('#00000088'));
-    this.uiContainer.add(this.nextEpisodeBtn);
-
-    // Location card (centered)
-    this.locationCard = this.add.container(width / 2, height / 2);
-    this.locationCard.setVisible(false);
-
-    const locationBg = this.add.rectangle(0, 0, 400, 150, 0x000000, 0.8);
-    this.locationTitle = this.add.text(0, -30, '', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-    this.locationDate = this.add.text(0, 30, '', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '20px',
-      color: '#cccccc',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-
-    this.locationCard.add([locationBg, this.locationTitle, this.locationDate]);
-    this.uiContainer.add(this.locationCard);
+    // Game UI — episode indicator, location card, prompts, back button
+    this.gameUI = new GameUI(this, {
+      onSkipEpisode: (delta) => this.skipToEpisode(this.currentEpisode + delta),
+      onGoBack: () => this.goBack(),
+    });
 
     // Speech bubble
-    this.speechBubble = this.add.container(0, 0);
-    this.speechBubble.setVisible(false);
-
-    this.speechBg = this.add.graphics();
-    this.speechSpeaker = this.add.text(0, 0, '', {
-      fontFamily: 'Lato',
-      fontSize: '14px',
-      color: '#e57373',
-      fontStyle: 'bold'
-    });
-    this.speechText = this.add.text(0, 20, '', {
-      fontFamily: 'Lato',
-      fontSize: '18px',
-      color: '#333333',
-      wordWrap: { width: 350 }
-    });
-
-    this.speechBubble.add([this.speechBg, this.speechSpeaker, this.speechText]);
-    this.uiContainer.add(this.speechBubble);
-
-    // Continue prompt - top center so it doesn't overlap characters
-    this.continuePrompt = this.add.text(width / 2, 80, '▶ Tap to continue', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#e5737388',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setVisible(false);
-    this.uiContainer.add(this.continuePrompt);
-
-    // Back button for dialogue - allows going back through conversation
-    this.backButton = this.add.text(20, 80, '◀ Back', {
-      fontFamily: 'Lato',
-      fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#55555588',
-      padding: { x: 15, y: 10 }
-    }).setOrigin(0, 0.5).setVisible(false).setInteractive({ useHandCursor: true });
-    this.backButton.on('pointerdown', () => this.goBack());
-    this.backButton.on('pointerover', () => this.backButton.setBackgroundColor('#777777aa'));
-    this.backButton.on('pointerout', () => this.backButton.setBackgroundColor('#55555588'));
-    this.uiContainer.add(this.backButton);
+    this.speechBubble = new SpeechBubble(this);
+    this.speechBubble.addToContainer(this.gameUI.container);
 
     // Track dialogue history for back navigation
     this.dialogueHistory = [];
@@ -211,9 +122,7 @@ class GameScene extends Phaser.Scene {
     this.dialogueHistory = []; // Reset history for new episode
 
     // Update episode indicator and skip button visibility
-    this.episodeText.setText(`Episode ${episode.id} of ${EPISODES.length}`);
-    this.prevEpisodeBtn.setVisible(this.currentEpisode > 0);
-    this.nextEpisodeBtn.setVisible(this.currentEpisode < EPISODES.length - 1);
+    this.gameUI.updateEpisodeIndicator(episode.id, EPISODES.length, this.currentEpisode);
 
     // Clean up restaurant scene if it was active
     this.cleanupRestaurant();
@@ -227,30 +136,10 @@ class GameScene extends Phaser.Scene {
     // Block input during location card display
     this.isAnimating = true;
 
-    // Show location card
-    this.locationTitle.setText(episode.name);
-    this.locationDate.setText(episode.date);
-    this.locationCard.setVisible(true);
-    this.locationCard.setAlpha(0);
-
-    this.tweens.add({
-      targets: this.locationCard,
-      alpha: 1,
-      duration: 500,
-      onComplete: () => {
-        this.time.delayedCall(1500, () => {
-          this.tweens.add({
-            targets: this.locationCard,
-            alpha: 0,
-            duration: 500,
-            onComplete: () => {
-              this.locationCard.setVisible(false);
-              this.isAnimating = false;
-              this.processDialogue();
-            }
-          });
-        });
-      }
+    // Show location card with animated reveal
+    this.gameUI.showLocationCard(episode.name, episode.date, () => {
+      this.isAnimating = false;
+      this.processDialogue();
     });
   }
 
@@ -504,98 +393,36 @@ class GameScene extends Phaser.Scene {
       const eloraX = this.elora.x > 100 ? this.elora.x : (this.eloraExpectedX || this.width * 0.6);
 
       if (eneaX < eloraX) {
-        // Enea is left, Elora is right - face each other
-        this.enea.setFlipX(true);   // Face right (toward Elora)
-        this.elora.setFlipX(false); // Face left (toward Enea)
+        this.enea.setFlipX(true);
+        this.elora.setFlipX(false);
       } else {
-        // Enea is right, Elora is left
-        this.enea.setFlipX(false);  // Face left (toward Elora)
-        this.elora.setFlipX(true);  // Face right (toward Enea)
+        this.enea.setFlipX(false);
+        this.elora.setFlipX(true);
       }
     }
 
-    this.speechSpeaker.setText(name);
-    this.speechText.setText(text);
-
-    // Calculate bubble size
-    const textBounds = this.speechText.getBounds();
-    const bubbleWidth = Math.max(textBounds.width + 40, 200);
-    const bubbleHeight = textBounds.height + 60;
-
-    // Position bubble above the speaking character
-    // Use expected position as fallback, or hardcoded position if all else fails
+    // Resolve character position with fallbacks
     let charX = char.x;
-    if (isEnea) {
-      // For Enea, use expected position or default to right side (70% of screen)
-      if (charX < 100) {
-        charX = this.eneaExpectedX || (this.width || 1280) * 0.7;
-      }
-    } else {
-      // For Elora, use expected position or default to left side (35% of screen)
-      if (charX < 100) {
-        charX = this.eloraExpectedX || (this.width || 1280) * 0.35;
-      }
+    if (charX < 100) {
+      charX = isEnea
+        ? (this.eneaExpectedX || this.width * 0.7)
+        : (this.eloraExpectedX || this.width * 0.35);
     }
 
-    let bubbleX = charX;
-    // Position bubble above the character's head
-    // Character sprite is 192px tall (64 * scale 3), origin at bottom
-    // Head is at char.y - 192, bubble goes well above that
-    // Extra gap leaves room for blush/emotion effects above the head
-    let bubbleY = char.y - 260;
+    this.speechBubble.show(name, text, charX, char.y, this.width);
 
-    // Keep bubble on screen
-    const screenWidth = this.width || 1280;
-    if (bubbleX - bubbleWidth / 2 < 20) bubbleX = bubbleWidth / 2 + 20;
-    if (bubbleX + bubbleWidth / 2 > screenWidth - 20) bubbleX = screenWidth - bubbleWidth / 2 - 20;
-    if (bubbleY < 100) bubbleY = 100;
+    // Trigger speech effects
+    if (effect === 'blush') createBlushEffect(this);
+    else if (effect === 'heart-flutter') createHeartFlutterEffect(this);
+    else if (effect === 'embarrassed') createEmbarrassedEffect(this);
 
-    // Draw bubble background with pointer
-    this.speechBg.clear();
-    this.speechBg.fillStyle(0xffffff, 1);
-    this.speechBg.fillRoundedRect(-20, -20, bubbleWidth, bubbleHeight, 15);
-
-    // Draw pointer triangle pointing down toward character
-    const pointerX = bubbleWidth / 2 - 20; // Center of bubble
-    this.speechBg.fillTriangle(
-      pointerX - 10, bubbleHeight - 20,
-      pointerX + 10, bubbleHeight - 20,
-      pointerX, bubbleHeight
-    );
-
-    // Add subtle border
-    this.speechBg.lineStyle(2, 0xe57373, 0.5);
-    this.speechBg.strokeRoundedRect(-20, -20, bubbleWidth, bubbleHeight, 15);
-
-    this.speechBubble.setPosition(bubbleX - bubbleWidth / 2, bubbleY);
-    this.speechBubble.setVisible(true);
-    this.speechBubble.setAlpha(0);
-
-    this.tweens.add({
-      targets: this.speechBubble,
-      alpha: 1,
-      duration: 200
-    });
-
-    // Handle special effects
-    if (effect === 'blush') {
-      createBlushEffect(this);
-    } else if (effect === 'heart-flutter') {
-      createHeartFlutterEffect(this);
-    } else if (effect === 'embarrassed') {
-      createEmbarrassedEffect(this);
-    }
-
-    this.continuePrompt.setVisible(true);
-    // Show back button if we have dialogue history
-    this.backButton.setVisible(this.dialogueHistory.length > 0);
+    this.gameUI.showContinuePrompt(this.dialogueHistory.length > 0);
     this.isAnimating = false;
   }
 
   hideSpeech() {
-    this.speechBubble.setVisible(false);
-    this.continuePrompt.setVisible(false);
-    this.backButton.setVisible(false);
+    this.speechBubble.hide();
+    this.gameUI.hidePrompts();
     clearBlushEffect(this);
   }
 
@@ -739,7 +566,7 @@ class GameScene extends Phaser.Scene {
     // Hide speech and photo overlays
     this.hideSpeech();
     this.photoOverlay.setVisible(false);
-    this.locationCard.setVisible(false);
+    this.gameUI.hideLocationCard();
 
     // Apply all unlocks from episodes up to (but not including) the target
     this.hasElora = false;
