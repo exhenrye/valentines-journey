@@ -1,4 +1,5 @@
 import { createHearts } from '../effects/VisualEffects.js';
+import { advanceDialogue } from './utils.js';
 
 export function eneaWaitRight(scene, dialogue) {
   // Explicitly position Enea at 70% width, facing left
@@ -119,9 +120,7 @@ export function faceEachOther(scene, dialogue) {
   scene.elora.setVisible(true);
   scene.eloraExpectedX = faceEloraX;
 
-  scene.isAnimating = false;
-  scene.dialogueIndex++;
-  scene.processDialogue();
+  advanceDialogue(scene);
 }
 
 export function familyArrive(scene, dialogue) {
@@ -151,9 +150,7 @@ export function familyArrive(scene, dialogue) {
     scene.horse.setFlipX(true);
     scene.horse.setVisible(true);
   }
-  scene.isAnimating = false;
-  scene.dialogueIndex++;
-  scene.processDialogue();
+  advanceDialogue(scene);
 }
 
 export function eneaEnterRight(scene, dialogue) {
@@ -294,7 +291,5 @@ export function familyTogether(scene, dialogue) {
     scene.horse.setFlipX(true);
     scene.horse.setVisible(true);
   }
-  scene.isAnimating = false;
-  scene.dialogueIndex++;
-  scene.processDialogue();
+  advanceDialogue(scene);
 }

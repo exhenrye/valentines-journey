@@ -1,4 +1,5 @@
 import { createHeartGraphic, createHearts } from '../effects/VisualEffects.js';
+import { advanceDialogue, advanceDialogueAfterDelay } from './utils.js';
 
 export function wait(scene, dialogue) {
   scene.showSpeech(dialogue.speaker, dialogue.text);
@@ -7,11 +8,7 @@ export function wait(scene, dialogue) {
 export function pauseBeat(scene, dialogue) {
   // Dramatic pause - no interaction, just wait
   const pauseDuration = dialogue.duration || 800;
-  scene.time.delayedCall(pauseDuration, () => {
-    scene.isAnimating = false;
-    scene.dialogueIndex++;
-    scene.processDialogue();
-  });
+  advanceDialogueAfterDelay(scene, pauseDuration);
 }
 
 export function lookAtEachOther(scene, dialogue) {
@@ -45,9 +42,7 @@ export function lookAtEachOther(scene, dialogue) {
         ease: 'Sine.easeIn',
         onComplete: () => {
           floatingHeart.destroy();
-          scene.isAnimating = false;
-          scene.dialogueIndex++;
-          scene.processDialogue();
+          advanceDialogue(scene);
         },
       });
     },
@@ -56,11 +51,7 @@ export function lookAtEachOther(scene, dialogue) {
 
 export function hearts(scene, dialogue) {
   createHearts(scene);
-  scene.time.delayedCall(2000, () => {
-    scene.isAnimating = false;
-    scene.dialogueIndex++;
-    scene.processDialogue();
-  });
+  advanceDialogueAfterDelay(scene, 2000);
 }
 
 export function photo(scene, dialogue) {

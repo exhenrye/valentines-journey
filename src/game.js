@@ -19,6 +19,7 @@ import GameUI from './ui/GameUI.js';
 import BackgroundManager from './managers/BackgroundManager.js';
 import CharacterManager from './managers/CharacterManager.js';
 import RestaurantScene from './restaurant/RestaurantScene.js';
+import { applyUnlocksUpTo, applyCurrentUnlock } from './utils/progression.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -241,9 +242,7 @@ class GameScene extends Phaser.Scene {
     this.hideSpeech();
 
     // Handle unlock
-    if (episode.unlock === 'elora') this.hasElora = true;
-    if (episode.unlock === 'dog') this.hasDog = true;
-    if (episode.unlock === 'baby') this.hasBaby = true;
+    applyCurrentUnlock(this, episode);
 
     this.photoOverlay.show(episode, () => {
       // Episode progression after photo closes
@@ -287,27 +286,7 @@ class GameScene extends Phaser.Scene {
         // This is a dialogue beat - save position for back navigation
         this.dialogueHistory.push({
           index: this.dialogueIndex,
-          eneaX: this.enea.x,
-          eneaY: this.enea.y,
-          eneaVisible: this.enea.visible,
-          eneaFlipX: this.enea.flipX,
-          eneaExpectedX: this.eneaExpectedX,
-          eloraX: this.elora.x,
-          eloraY: this.elora.y,
-          eloraVisible: this.elora.visible,
-          eloraFlipX: this.elora.flipX,
-          eloraExpectedX: this.eloraExpectedX,
-          dogVisible: this.dog.visible,
-          dogX: this.dog.x,
-          dogY: this.dog.y,
-          cat1Visible: this.cat1.visible,
-          cat1X: this.cat1.x,
-          cat2Visible: this.cat2.visible,
-          cat2X: this.cat2.x,
-          horseVisible: this.horse.visible,
-          horseX: this.horse.x,
-          babyVisible: this.baby.visible,
-          babyX: this.baby.x,
+          ...this.characterManager.getState(),
         });
       }
     }
@@ -331,32 +310,8 @@ class GameScene extends Phaser.Scene {
     // Hide current speech
     this.hideSpeech();
 
-    // Restore character positions
-    this.enea.setPosition(prevState.eneaX, prevState.eneaY);
-    this.enea.setVisible(prevState.eneaVisible);
-    this.enea.setFlipX(prevState.eneaFlipX);
-    this.enea.stop();
-    this.enea.setFrame(0);
-    this.eneaExpectedX = prevState.eneaExpectedX;
-
-    this.elora.setPosition(prevState.eloraX, prevState.eloraY);
-    this.elora.setVisible(prevState.eloraVisible);
-    this.elora.setFlipX(prevState.eloraFlipX);
-    this.elora.stop();
-    this.elora.setFrame(0);
-    this.eloraExpectedX = prevState.eloraExpectedX;
-
-    // Restore companion state
-    this.dog.setPosition(prevState.dogX, prevState.dogY);
-    this.dog.setVisible(prevState.dogVisible);
-    this.cat1.setPosition(prevState.cat1X, this.cat1.y);
-    this.cat1.setVisible(prevState.cat1Visible);
-    this.cat2.setPosition(prevState.cat2X, this.cat2.y);
-    this.cat2.setVisible(prevState.cat2Visible);
-    this.horse.setPosition(prevState.horseX, this.horse.y);
-    this.horse.setVisible(prevState.horseVisible);
-    this.baby.setPosition(prevState.babyX, this.baby.y);
-    this.baby.setVisible(prevState.babyVisible);
+    // Restore character and companion state
+    this.characterManager.restoreState(prevState);
 
     // Go back to previous dialogue
     this.dialogueIndex = prevState.index;
@@ -378,15 +333,7 @@ class GameScene extends Phaser.Scene {
     this.gameUI.hideLocationCard();
 
     // Apply all unlocks from episodes up to (but not including) the target
-    this.hasElora = false;
-    this.hasDog = false;
-    this.hasBaby = false;
-    for (let i = 0; i < targetIndex; i++) {
-      const ep = EPISODES[i];
-      if (ep.unlock === 'elora') this.hasElora = true;
-      if (ep.unlock === 'dog') this.hasDog = true;
-      if (ep.unlock === 'baby') this.hasBaby = true;
-    }
+    applyUnlocksUpTo(this, targetIndex);
 
     // Jump to the target episode
     this.currentEpisode = targetIndex;

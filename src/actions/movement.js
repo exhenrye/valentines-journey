@@ -1,3 +1,5 @@
+import { advanceDialogue, advanceDialogueAfterDelay } from './utils.js';
+
 export function walkTogetherRight(scene, dialogue) {
   // Both face right and walk together
   // Keep characters mostly stationary, scroll background to create movement illusion
@@ -25,9 +27,7 @@ export function walkTogetherRight(scene, dialogue) {
       scene.enea.setFrame(0);
       scene.elora.stop();
       scene.elora.setFrame(0);
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
@@ -62,18 +62,14 @@ export function exitRight(scene, dialogue) {
       scene.elora.stop();
       scene.enea.setVisible(false);
       scene.elora.setVisible(false);
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
 
 export function walkTogether(scene, dialogue) {
   scene.walkTogether(() => {
-    scene.isAnimating = false;
-    scene.dialogueIndex++;
-    scene.processDialogue();
+    advanceDialogue(scene);
   });
 }
 
@@ -113,9 +109,7 @@ export function walkTogetherStart(scene, dialogue) {
     scene.horse.setFlipX(true);
     scene.horse.setVisible(true);
   }
-  scene.isAnimating = false;
-  scene.dialogueIndex++;
-  scene.processDialogue();
+  advanceDialogue(scene);
 }
 
 export function pauseBeforeExit(scene, dialogue) {
@@ -126,9 +120,5 @@ export function pauseBeforeExit(scene, dialogue) {
   scene.elora.stop();
   scene.elora.setFrame(0);
 
-  scene.time.delayedCall(exitPauseDuration, () => {
-    scene.isAnimating = false;
-    scene.dialogueIndex++;
-    scene.processDialogue();
-  });
+  advanceDialogueAfterDelay(scene, exitPauseDuration);
 }

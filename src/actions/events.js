@@ -1,11 +1,11 @@
 import { EPISODES } from '../data/episodes/index.js';
+import { advanceDialogue } from './utils.js';
+import { applyCurrentUnlock } from '../utils/progression.js';
 
 export function nextEpisode(scene, dialogue) {
   // Handle unlock before advancing (same as photo action)
   const currentEp = EPISODES[scene.currentEpisode];
-  if (currentEp.unlock === 'elora') scene.hasElora = true;
-  if (currentEp.unlock === 'dog') scene.hasDog = true;
-  if (currentEp.unlock === 'baby') scene.hasBaby = true;
+  applyCurrentUnlock(scene, currentEp);
 
   // Skip to next episode without photo
   scene.currentEpisode++;
@@ -88,9 +88,7 @@ export function plane(scene, dialogue) {
       scene.plane.setRotation(0);
       shadow.destroy();
       trailTimer.destroy();
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
@@ -106,9 +104,7 @@ export function dogJoin(scene, dialogue) {
     alpha: 1,
     duration: 500,
     onComplete: () => {
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
@@ -125,9 +121,7 @@ export function babyArrive(scene, dialogue) {
     alpha: 1,
     duration: 500,
     onComplete: () => {
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
@@ -137,9 +131,7 @@ export function restaurantScene(scene, dialogue) {
   scene.tweens.killTweensOf([scene.enea, scene.elora, scene.dog]);
   // Transition to restaurant interior
   scene.setupRestaurant();
-  scene.isAnimating = false;
-  scene.dialogueIndex++;
-  scene.processDialogue();
+  advanceDialogue(scene);
 }
 
 export function weddingSetup(scene, dialogue) {
@@ -174,9 +166,7 @@ export function eloraWalkAisle(scene, dialogue) {
       scene.enea.setPosition(eneaTarget, scene.groundY);
       scene.eneaExpectedX = eneaTarget;
       scene.eloraExpectedX = eloraTarget;
-      scene.isAnimating = false;
-      scene.dialogueIndex++;
-      scene.processDialogue();
+      advanceDialogue(scene);
     },
   });
 }
@@ -225,9 +215,7 @@ export function kneel(scene, dialogue) {
       if (dialogue.speaker && dialogue.text) {
         scene.showSpeech(dialogue.speaker, dialogue.text);
       } else {
-        scene.isAnimating = false;
-        scene.dialogueIndex++;
-        scene.processDialogue();
+        advanceDialogue(scene);
       }
     },
   });

@@ -239,6 +239,59 @@ export default class CharacterManager {
     this.horse.setFrame(0);
   }
 
+  getState() {
+    return {
+      eneaX: this.enea.x,
+      eneaY: this.enea.y,
+      eneaVisible: this.enea.visible,
+      eneaFlipX: this.enea.flipX,
+      eneaExpectedX: this.eneaExpectedX,
+      eloraX: this.elora.x,
+      eloraY: this.elora.y,
+      eloraVisible: this.elora.visible,
+      eloraFlipX: this.elora.flipX,
+      eloraExpectedX: this.eloraExpectedX,
+      dogVisible: this.dog.visible,
+      dogX: this.dog.x,
+      dogY: this.dog.y,
+      cat1Visible: this.cat1.visible,
+      cat1X: this.cat1.x,
+      cat2Visible: this.cat2.visible,
+      cat2X: this.cat2.x,
+      horseVisible: this.horse.visible,
+      horseX: this.horse.x,
+      babyVisible: this.baby.visible,
+      babyX: this.baby.x,
+    };
+  }
+
+  restoreState(state) {
+    this.enea.setPosition(state.eneaX, state.eneaY);
+    this.enea.setVisible(state.eneaVisible);
+    this.enea.setFlipX(state.eneaFlipX);
+    this.enea.stop();
+    this.enea.setFrame(0);
+    this.eneaExpectedX = state.eneaExpectedX;
+
+    this.elora.setPosition(state.eloraX, state.eloraY);
+    this.elora.setVisible(state.eloraVisible);
+    this.elora.setFlipX(state.eloraFlipX);
+    this.elora.stop();
+    this.elora.setFrame(0);
+    this.eloraExpectedX = state.eloraExpectedX;
+
+    this.dog.setPosition(state.dogX, state.dogY);
+    this.dog.setVisible(state.dogVisible);
+    this.cat1.setPosition(state.cat1X, this.cat1.y);
+    this.cat1.setVisible(state.cat1Visible);
+    this.cat2.setPosition(state.cat2X, this.cat2.y);
+    this.cat2.setVisible(state.cat2Visible);
+    this.horse.setPosition(state.horseX, this.horse.y);
+    this.horse.setVisible(state.horseVisible);
+    this.baby.setPosition(state.babyX, this.baby.y);
+    this.baby.setVisible(state.babyVisible);
+  }
+
   walkTogether(callback) {
     const scene = this.scene;
     const targetX = scene.width * 0.7;
