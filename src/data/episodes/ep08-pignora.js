@@ -1,0 +1,37 @@
+const episode = {
+  id: 8,
+  name: 'Pignora',
+  date: 'August 13, 2022',
+  background: 'forest',
+  icon: '\u2661',
+  outfits: { enea: 'male-chainmail', eneaHat: 'male-guard-helmet', elora: 'female-queen-dress', eloraHat: 'female-hat3' },
+  caption: 'Surrounded by everyone we love. You walked toward me and I couldn\'t breathe. The day you became my wife.',
+  photos: [
+    'assets/photos/08-pignora/IMG_0065.JPG',
+    'assets/photos/08-pignora/IMG_4080.jpeg',
+    'assets/photos/08-pignora/IMG_4081.jpeg',
+    'assets/photos/08-pignora/IMG_4095.jpeg',
+    'assets/photos/08-pignora/IMG_0080.JPG',
+    'assets/photos/08-pignora/_DSF0547.JPG',
+    'assets/photos/08-pignora/_DSF0596.JPG',
+    'assets/photos/08-pignora/IMG_4141.jpeg',
+  ],
+  dialogue: [
+    { speaker: 'enea', text: 'This is really happening.', action: 'wedding-setup' },
+    { speaker: 'enea', text: 'Pignora. Where my family has gathered for generations. And she\'s about to walk toward me.' },
+    { action: 'elora-walk-aisle' },
+    { action: 'pause-beat', duration: 1200 },
+    { speaker: 'elora', text: 'Hi.' },
+    { speaker: 'enea', text: 'You\'re the most beautiful thing I\'ve ever seen.' },
+    { speaker: 'elora', text: 'Don\'t make me cry. I just did my makeup.' },
+    { action: 'look-at-each-other', duration: 1200 },
+    { speaker: 'enea', text: 'I do. Forever.' },
+    { speaker: 'elora', text: 'I do.' },
+    { action: 'embrace' },
+    { speaker: 'enea', text: 'My wife. I\'ll never get tired of saying that.' },
+    { action: 'hearts' },
+    { action: 'photo' },
+  ],
+};
+
+export default episode;

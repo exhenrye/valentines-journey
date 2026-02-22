@@ -5,417 +5,10 @@
 
 import { EPISODES } from './data/episodes/index.js';
 import { BACKGROUNDS } from './data/backgrounds.js';
-
-// ============================================================
-// BOOT SCENE - Load all assets
-// ============================================================
-class BootScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'BootScene' });
-  }
-
-  preload() {
-    // Show loading bar
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
-    const progressBar = this.add.graphics();
-    const progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
-
-    const loadingText = this.add.text(width / 2, height / 2 - 50, 'Loading...', {
-      font: '20px Lato',
-      fill: '#ffffff'
-    }).setOrigin(0.5);
-
-    this.load.on('progress', (value) => {
-      progressBar.clear();
-      progressBar.fillStyle(0xe57373, 1);
-      progressBar.fillRect(width / 2 - 150, height / 2 - 15, 300 * value, 30);
-    });
-
-    this.load.on('complete', () => {
-      progressBar.destroy();
-      progressBox.destroy();
-      loadingText.destroy();
-    });
-
-    // Log any failed assets
-    this.load.on('loaderror', (file) => {
-      console.error('LOAD FAILED:', file.key, file.url);
-    });
-
-    // Load character sprites
-    this.load.spritesheet('male', 'assets/chars/male.png', {
-      frameWidth: 100,
-      frameHeight: 64
-    });
-    this.load.spritesheet('female', 'assets/chars/female.png', {
-      frameWidth: 100,
-      frameHeight: 64
-    });
-
-    // Load city-night backgrounds
-    this.load.image('city1', 'assets/backgrounds/city-night/PixelcityFullHD02_layer01.png');
-    this.load.image('city2', 'assets/backgrounds/city-night/PixelcityFullHD02_layer02.png');
-    this.load.image('city3', 'assets/backgrounds/city-night/PixelcityFullHD02_layer03.png');
-    this.load.image('city4', 'assets/backgrounds/city-night/PixelcityFullHD02_layer04.png');
-    this.load.image('city5', 'assets/backgrounds/city-night/PixelcityFullHD02_layer05.png');
-    this.load.image('city6', 'assets/backgrounds/city-night/PixelcityFullHD02_layer06.png');
-
-    // Load forest backgrounds
-    this.load.image('forest1', 'assets/backgrounds/forest-oak/background_layer_1.png');
-    this.load.image('forest2', 'assets/backgrounds/forest-oak/background_layer_2.png');
-    this.load.image('forest3', 'assets/backgrounds/forest-oak/background_layer_3.png');
-
-    // Load town-sunset backgrounds
-    this.load.image('town-sunset1', 'assets/backgrounds/town-sunset/PixelTown_Sunset_layer01.png');
-    this.load.image('town-sunset5', 'assets/backgrounds/town-sunset/PixelTown_Sunset_layer05.png');
-    this.load.image('town-sunset9', 'assets/backgrounds/town-sunset/PixelTown_Sunset_layer09.png');
-
-    // Load town-day backgrounds
-    this.load.image('town-day1', 'assets/backgrounds/town-day/PixelTown_Day_layer01.png');
-    this.load.image('town-day5', 'assets/backgrounds/town-day/PixelTown_Day_layer05.png');
-    this.load.image('town-day9', 'assets/backgrounds/town-day/PixelTown_Day_layer09.png');
-
-    // Load town-night backgrounds (for Madrid)
-    this.load.image('town-night1', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer01.png');
-    this.load.image('town-night3', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer03.png');
-    this.load.image('town-night5', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer05.png');
-    this.load.image('town-night7', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer07.png');
-    this.load.image('town-night9', 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Night/PixelTown_Night_layer09.png');
-
-    // Load christmas-night backgrounds (for Leavenworth)
-    const xmasBase = 'assets/backgrounds/town/Pixel Town - Parallax Background 1.2/Christmas Night/';
-    this.load.image('xmas1', xmasBase + 'PixelTown_Christmasnight_layer01.png');
-    this.load.image('xmas3', xmasBase + 'PixelTown_Christmasnight_layer03.png');
-    this.load.image('xmas5', xmasBase + 'PixelTown_Christmasnight_layer05.png');
-    this.load.image('xmas7', xmasBase + 'PixelTown_Christmasnight_layer07.png');
-    this.load.image('xmas9', xmasBase + 'PixelTown_Christmasnight_layer09.png');
-    this.load.image('xmas10', xmasBase + 'PixelTown_Christmasnight_layer10.png');
-
-    // Load ancient temple backgrounds (for Rome proposal)
-    const templeBase = 'assets/backgrounds/ancient-temple/PNG/background 3/';
-    this.load.image('temple1', templeBase + 'Plan 1.png');
-    this.load.image('temple2', templeBase + 'Plan 2.png');
-    this.load.image('temple3', templeBase + 'Plan 3.png');
-    this.load.image('temple4', templeBase + 'Plan 4.png');
-    this.load.image('temple5', templeBase + 'Plan 5.png');
-
-    // Load mountain backgrounds
-    this.load.image('mtn-sky', 'assets/backgrounds/mountains-dusk/sky.png');
-    this.load.image('mtn-far', 'assets/backgrounds/mountains-dusk/far-mountains.png');
-    this.load.image('mtn-mid', 'assets/backgrounds/mountains-dusk/mountains.png');
-    this.load.image('mtn-trees', 'assets/backgrounds/mountains-dusk/trees.png');
-
-    // Load sunset backgrounds
-    this.load.image('sunset1', 'assets/backgrounds/sunset-orange/01_SkyOrange.png');
-    this.load.image('sunset2', 'assets/backgrounds/sunset-orange/02_SkysunsetOrange.png');
-    this.load.image('sunset3', 'assets/backgrounds/sunset-orange/03_WaterOrange.png');
-    this.load.image('sunset4', 'assets/backgrounds/sunset-orange/04_PalmsOrange.png');
-
-    // Load purple sunset backgrounds
-    this.load.image('purple1', 'assets/backgrounds/sunset-purple/01_SkyPurple.png');
-    this.load.image('purple2', 'assets/backgrounds/sunset-purple/02_SkysunsetPurple.png');
-    this.load.image('purple3', 'assets/backgrounds/sunset-purple/03_WaterPurple.png');
-    this.load.image('purple4', 'assets/backgrounds/sunset-purple/04_PalmsPurple.png');
-
-    // Load dog sprite sheet (Totoro)
-    this.load.spritesheet('dog', 'assets/characters/GandalfHardcore Pet companion/GandalfHardcore doggy sheet.png', {
-      frameWidth: 24,
-      frameHeight: 32
-    });
-
-    // Load baby sprite sheet (Elthen pack - 32x32 frames, 12 cols x 6 rows)
-    this.load.spritesheet('baby', 'assets/characters/baby/Human Baby Sprite Sheet.png', {
-      frameWidth: 32, frameHeight: 32
-    });
-
-    // Load restaurant / interior assets
-    this.load.image('wallpaper-tile', 'assets/backgrounds/interior/House/Wallpaper5_Tile.png');
-    this.load.image('floor-tile', 'assets/backgrounds/interior/House/Platform_Middle.png');
-    this.load.image('table-single', 'assets/backgrounds/interior/Furniture/Table_Single.png');
-    this.load.image('chair', 'assets/backgrounds/interior/Furniture/Chair.png');
-    this.load.image('candle', 'assets/backgrounds/interior/Furniture/Candle.png');
-    this.load.image('painting-lg', 'assets/backgrounds/interior/Furniture/Painting_Large.png');
-    this.load.image('painting-sm', 'assets/backgrounds/interior/Furniture/Painting_Small.png');
-    this.load.image('plant', 'assets/backgrounds/interior/Furniture/Plant.png');
-    this.load.image('floor-lamp', 'assets/backgrounds/interior/Furniture/FloorLamp.png');
-    this.load.image('ceiling-lamp-top', 'assets/backgrounds/interior/Furniture/CeilingLamp_Top.png');
-    this.load.image('ceiling-lamp-mid', 'assets/backgrounds/interior/Furniture/CeilingLamp_Mid.png');
-    this.load.image('ceiling-lamp-btm', 'assets/backgrounds/interior/Furniture/CeilingLamp_Bottom.png');
-    this.load.image('window-front', 'assets/backgrounds/interior/House/Window_Front.png');
-    this.load.image('mug', 'assets/backgrounds/interior/Furniture/Mug.png');
-
-    // Restaurant tileset (Riley's pack) - silverware and furniture
-    this.load.spritesheet('silverware', 'assets/restaurant-tileset/Spritesheets/Silverware.png', {
-      frameWidth: 32, frameHeight: 32
-    });
-    // Silverware frames: 0=fork, 1=spoon, 2=knife, 3=small plate, 4=plate, 5=bowl, 6=napkin dark, 7=napkin folded, 8=small item
-    this.load.spritesheet('rest-furniture', 'assets/restaurant-tileset/Spritesheets/Furniture.png', {
-      frameWidth: 32, frameHeight: 32
-    });
-    // Furniture frames: 0=stool, 1=table, 2=chair, 3=door
-
-    // Load clothing overlays (GandalfHardcore pack - same 100x64 frame layout as base sprites)
-    const clothesBase = 'assets/chars/clothes/';
-    const clothesList = [
-      'female-dress-red', 'female-dress-blue', 'female-bodice-orange',
-      'female-bodice-purple', 'female-bodice-green', 'female-queen-dress',
-      'female-fancy-blue', 'male-chainmail', 'male-split-hose',
-      'male-shirt-blue', 'male-shirt-green', 'male-shirt-purple',
-      'male-shirt-orange', 'male-shirt-white',
-      'male-pants-blue', 'male-pants-green', 'male-pants-orange',
-      'male-pants-purple', 'male-pants-brown',
-      'male-boots', 'male-shoes'
-    ];
-    clothesList.forEach(key => {
-      this.load.spritesheet(key, clothesBase + key + '.png', {
-        frameWidth: 100, frameHeight: 64
-      });
-    });
-
-    // Load hat overlays (GandalfHardcore pack - same 100x64 frame layout)
-    const hatsBase = 'assets/chars/hats/';
-    const hatsList = [
-      'male-hat1', 'male-hat2', 'male-hat3', 'male-hat4', 'male-hat5',
-      'male-blue-cap', 'male-green-cap', 'male-red-cap', 'male-orange-cap',
-      'male-purple-cap', 'male-santa-hat', 'male-guard-helmet', 'male-farming-hat',
-      'female-hat1', 'female-hat2', 'female-hat3', 'female-santa-hat',
-      'female-blue-cap', 'female-red-cap'
-    ];
-    hatsList.forEach(key => {
-      this.load.spritesheet(key, hatsBase + key + '.png', {
-        frameWidth: 100, frameHeight: 64
-      });
-    });
-
-    // Load episode photos dynamically
-    EPISODES.forEach(episode => {
-      if (episode.photos) {
-        episode.photos.forEach((photoPath, index) => {
-          const key = `photo-${episode.id}-${index}`;
-          this.load.image(key, photoPath);
-        });
-      }
-    });
-  }
-
-  create() {
-    // Create character animations
-    // Sprite sheet layout: Row 0 = idle (5 frames), Row 2 = walk right (8 frames)
-    // Each row has 8 columns, so row 2 starts at frame 16
-
-    this.anims.create({
-      key: 'male-walk',
-      frames: this.anims.generateFrameNumbers('male', { start: 16, end: 23 }),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'male-idle',
-      frames: this.anims.generateFrameNumbers('male', { start: 0, end: 4 }),
-      frameRate: 6,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'female-walk',
-      frames: this.anims.generateFrameNumbers('female', { start: 16, end: 23 }),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'female-idle',
-      frames: this.anims.generateFrameNumbers('female', { start: 0, end: 4 }),
-      frameRate: 6,
-      repeat: -1
-    });
-
-    // Dog animations (sprite sheet: 8 columns x 2 rows, 24x32 per frame)
-    // Row 0 (frames 0-7): walk animation
-    this.anims.create({
-      key: 'dog-walk',
-      frames: this.anims.generateFrameNumbers('dog', { start: 0, end: 7 }),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    // Baby animations (sprite sheet: 12 columns x 6 rows, 32x32 per frame)
-    // Row 0 (frames 0-11): idle, Row 3 (frames 36-47): cry
-    this.anims.create({
-      key: 'baby-idle',
-      frames: this.anims.generateFrameNumbers('baby', { start: 0, end: 11 }),
-      frameRate: 8,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'baby-cry',
-      frames: this.anims.generateFrameNumbers('baby', { start: 36, end: 47 }),
-      frameRate: 8,
-      repeat: -1
-    });
-
-    // Go to title scene
-    this.scene.start('TitleScene');
-  }
-}
-
-// ============================================================
-// TITLE SCENE - Animated title screen
-// ============================================================
-class TitleScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'TitleScene' });
-  }
-
-  create() {
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
-    // Create parallax background
-    this.bgLayers = [];
-    const bgConfig = BACKGROUNDS['city-night'];
-
-    bgConfig.layers.forEach((layer, index) => {
-      const bg = this.add.tileSprite(0, 0, width, height, layer.key)
-        .setOrigin(0, 0)
-        .setScrollFactor(0);
-
-      // Scale to fill screen
-      const scaleX = width / bg.width;
-      const scaleY = height / bg.height;
-      const scale = Math.max(scaleX, scaleY);
-      bg.setScale(scale);
-
-      this.bgLayers.push({ sprite: bg, speed: layer.speed });
-    });
-
-    // Dark overlay
-    this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.5);
-
-    // Floating hearts (drawn graphics)
-    this.hearts = [];
-    for (let i = 0; i < 2; i++) {
-      const heartX = width / 2 - 50 + i * 100;
-      const heartY = height / 2 - 150;
-      const heart = this.createHeart(heartX, heartY, 24, 0xe57373);
-
-      this.tweens.add({
-        targets: heart,
-        y: heartY - 15,
-        duration: 1500,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        delay: i * 300
-      });
-
-      this.hearts.push(heart);
-    }
-
-    // Title
-    this.add.text(width / 2, height / 2 - 50, 'Our Journey', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '72px',
-      color: '#ffffff',
-      shadow: { blur: 10, color: '#000000', fill: true }
-    }).setOrigin(0.5);
-
-    // Subtitle
-    this.add.text(width / 2, height / 2 + 20, 'A love story across continents', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '24px',
-      color: '#cccccc',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-
-    // Start button
-    const button = this.add.rectangle(width / 2, height / 2 + 120, 280, 60, 0xe57373)
-      .setInteractive({ useHandCursor: true });
-
-    const buttonText = this.add.text(width / 2, height / 2 + 120, 'BEGIN OUR STORY', {
-      fontFamily: 'Lato',
-      fontSize: '18px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
-
-    // Button hover effect
-    button.on('pointerover', () => {
-      button.setFillStyle(0xc94c4c);
-      this.tweens.add({
-        targets: [button, buttonText],
-        scaleX: 1.05,
-        scaleY: 1.05,
-        duration: 100
-      });
-    });
-
-    button.on('pointerout', () => {
-      button.setFillStyle(0xe57373);
-      this.tweens.add({
-        targets: [button, buttonText],
-        scaleX: 1,
-        scaleY: 1,
-        duration: 100
-      });
-    });
-
-    button.on('pointerdown', () => {
-      this.startGame();
-    });
-
-    // Controls hint
-    this.add.text(width / 2, height / 2 + 200, 'Press SPACE or click to advance', {
-      fontFamily: 'Lato',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
-
-    // Keyboard input
-    this.input.keyboard.on('keydown-SPACE', () => {
-      this.startGame();
-    });
-
-    this.input.keyboard.on('keydown-ENTER', () => {
-      this.startGame();
-    });
-  }
-
-  update() {
-    // Scroll backgrounds
-    this.bgLayers.forEach(layer => {
-      layer.sprite.tilePositionX += layer.speed * 0.5;
-    });
-  }
-
-  startGame() {
-    this.cameras.main.fadeOut(500, 0, 0, 0);
-    this.time.delayedCall(500, () => {
-      this.scene.start('GameScene', { episode: 0 });
-    });
-  }
-
-  createHeart(x, y, size, color) {
-    const graphics = this.add.graphics();
-    graphics.fillStyle(color, 1);
-    // Draw heart using two circles and a triangle (Phaser 3 compatible)
-    const r = size * 0.5; // radius for the bumps
-    // Left bump
-    graphics.fillCircle(-r * 0.5, -r * 0.3, r);
-    // Right bump
-    graphics.fillCircle(r * 0.5, -r * 0.3, r);
-    // Bottom triangle
-    graphics.fillTriangle(-size, -r * 0.3, size, -r * 0.3, 0, size * 1.2);
-    graphics.setPosition(x, y);
-    return graphics;
-  }
-}
+import BootScene from './scenes/BootScene.js';
+import TitleScene from './scenes/TitleScene.js';
+import FinaleScene from './scenes/FinaleScene.js';
+import { ACTION_HANDLERS } from './actions/index.js';
 
 // ============================================================
 // GAME SCENE - Main gameplay
@@ -431,6 +24,8 @@ class GameScene extends Phaser.Scene {
     this.hasElora = false;
     this.hasDog = false;
     this.hasBaby = false;
+    this.hasCats = false;
+    this.hasHorse = false;
     this.isAnimating = false;
     this.dialogueHistory = [];
   }
@@ -448,6 +43,7 @@ class GameScene extends Phaser.Scene {
 
     // Ground level - characters walk at the very bottom on the street
     this.groundY = height * 0.98;
+    this.dogGroundY = this.groundY - 8; // Raised so dog legs aren't lost in background ground
 
     // Create Enea (hidden initially, actions will show/position)
     this.enea = this.add.sprite(width * 0.5, this.groundY, 'male')
@@ -491,13 +87,13 @@ class GameScene extends Phaser.Scene {
     this.eloraHat = this.add.sprite(0, 0, 'female-hat1')
       .setScale(3).setOrigin(0.5, 1).setDepth(102).setVisible(false);
 
-    // Dog sprite (Totoro - hidden initially)
-    this.dog = this.add.sprite(width * 0.2, this.groundY, 'dog')
+    // Dog sprite (changes texture per episode: Totoro/Joey/Marzipan)
+    this.dog = this.add.sprite(width * 0.2, this.dogGroundY, 'dog-totoro')
       .setScale(3)
       .setOrigin(0.5, 1)
       .setDepth(100)
       .setVisible(false);
-    this.dog.setFrame(0);
+    this.dog.setFrame(8);
 
     // Baby sprite (Elthen pack - hidden initially, shown in EP11)
     this.baby = this.add.sprite(width * 0.5, this.groundY, 'baby')
@@ -506,6 +102,30 @@ class GameScene extends Phaser.Scene {
       .setDepth(100)
       .setVisible(false);
     this.baby.setFrame(0);
+
+    // Cat sprites (two orange cats - same texture, cat2 flipped for variety)
+    this.cat1 = this.add.sprite(width * 0.15, this.groundY, 'cat-idle')
+      .setScale(2)
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setVisible(false);
+    this.cat1.setFrame(0);
+
+    this.cat2 = this.add.sprite(width * 0.12, this.groundY, 'cat-idle')
+      .setScale(2)
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setVisible(false)
+      .setFlipX(true);
+    this.cat2.setFrame(0);
+
+    // Horse sprite (Onfe black horse - Rome)
+    this.horse = this.add.sprite(width * 0.1, this.groundY, 'horse-black')
+      .setScale(3)
+      .setOrigin(0.5, 1)
+      .setDepth(99)
+      .setVisible(false);
+    this.horse.setFrame(0);
 
     // Create UI layer (highest depth)
     this.uiContainer = this.add.container(0, 0).setDepth(200);
@@ -777,17 +397,55 @@ class GameScene extends Phaser.Scene {
     this.enea.clearTint();
     this.elora.clearTint();
 
+    // Clean up proposal ring if present (from kneel action)
+    if (this.proposalRing) { this.proposalRing.destroy(); this.proposalRing = null; }
+    if (this.proposalRingGlow) { this.proposalRingGlow.destroy(); this.proposalRingGlow = null; }
+
     // Apply clothing overlays for this episode
     this.applyOutfits(episode.outfits);
 
+    // Swap dog texture/scale based on story timeline
+    const dogInfo = this.getDogForEpisode(episode.id);
+    this.dog.setTexture(dogInfo.texture);
+    this.dog.setScale(dogInfo.scale);
+    if (this.anims.exists('dog-walk')) {
+      this.anims.remove('dog-walk');
+    }
+    this.anims.create({
+      key: 'dog-walk',
+      frames: this.anims.generateFrameNumbers(dogInfo.texture, { start: 8, end: 15 }),
+      frameRate: 10,
+      repeat: -1
+    });
+
     this.dog.setVisible(false);
-    this.dog.setPosition(this.width * 0.2, this.groundY);
+    this.dog.setPosition(this.width * 0.2, this.dogGroundY);
     this.dog.stop();
-    this.dog.setFrame(0);
+    this.dog.setFrame(8);
 
     this.baby.setVisible(false);
     this.baby.stop();
     this.baby.setFrame(0);
+
+    // Set animal flags based on story timeline + per-episode overrides
+    // Dog: joins in EP05 (via dog-join action mid-episode), present from EP06+
+    // Some episodes override this (e.g., EP07: Joey wasn't in Rome)
+    this.hasDog = episode.id >= 6 && !episode.noDog;
+
+    // Cats: acquired in Geneva era, first confirmed EP09 (3 pet carriers to Seattle)
+    this.hasCats = episode.id >= 9;
+    this.cat1.setVisible(false);
+    this.cat1.stop();
+    this.cat1.setFrame(0);
+    this.cat2.setVisible(false);
+    this.cat2.stop();
+    this.cat2.setFrame(0);
+
+    // Horse: Rome gifted at Matthews Beach (EP10)
+    this.hasHorse = episode.id >= 10;
+    this.horse.setVisible(false);
+    this.horse.stop();
+    this.horse.setFrame(0);
 
     // Block input during location card display
     this.isAnimating = true;
@@ -840,599 +498,14 @@ class GameScene extends Phaser.Scene {
   handleAction(action, dialogue) {
     this.isAnimating = true;
 
-    switch (action) {
-      case 'wait':
-        this.showSpeech(dialogue.speaker, dialogue.text);
-        break;
-
-      // === EPISODE 1: MADRID ACTIONS ===
-      case 'enea-wait-right':
-        // Explicitly position Enea at 70% width, facing left
-        const waitRightX = this.width * 0.7;
-        this.enea.setPosition(waitRightX, this.groundY);
-        this.enea.setFlipX(true); // Face left toward where Elora will appear
-        this.enea.setVisible(true);
-        this.enea.setAlpha(1);
-        this.enea.stop();
-        this.enea.setFrame(0);
-        this.eneaExpectedX = waitRightX;
-
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.time.delayedCall(50, () => {
-          this.processDialogue();
-        });
-        break;
-
-      case 'elora-enter-left':
-        // Elora enters from the left, walking right toward Enea
-        // Per storyboard: walks from -100 to width * 0.35, facing right
-        this.hasElora = true;
-        const eloraTargetX = this.width * 0.35;
-        this.elora.setPosition(-100, this.groundY);
-        this.elora.setVisible(true);
-        this.elora.setFlipX(true); // Face right (walking direction)
-        this.elora.play('female-walk');
-
-        // Store expected position for speech bubble
-        this.eloraExpectedX = eloraTargetX;
-
-        this.tweens.add({
-          targets: this.elora,
-          x: eloraTargetX,
-          duration: 2500,
-          ease: 'Linear',
-          onComplete: () => {
-            this.elora.stop();
-            this.elora.setFrame(0);
-            this.elora.setFlipX(true); // Face right toward Enea
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'pause-beat':
-        // Dramatic pause - no interaction, just wait
-        const pauseDuration = dialogue.duration || 800;
-        this.time.delayedCall(pauseDuration, () => {
-          this.isAnimating = false;
-          this.dialogueIndex++;
-          this.processDialogue();
-        });
-        break;
-
-      case 'look-at-each-other':
-        // Romantic pause with heart floating up
-        const lookDuration = dialogue.duration || 1200;
-
-        // Use expected positions as fallback
-        const lookEneaX = this.enea.x > 100 ? this.enea.x : (this.eneaExpectedX || this.width * 0.7);
-        const lookEloraX = this.elora.x > 100 ? this.elora.x : (this.eloraExpectedX || this.width * 0.35);
-
-        // Create a drawn heart that floats up between them
-        const heartX = (lookEneaX + lookEloraX) / 2;
-        const heartY = this.groundY - 100;
-        const floatingHeart = this.createHeartGraphic(heartX, heartY, 20, 0xe57373);
-        floatingHeart.setAlpha(0).setDepth(150);
-
-        // Fade in and float up
-        this.tweens.add({
-          targets: floatingHeart,
-          alpha: 1,
-          y: heartY - 60,
-          duration: lookDuration * 0.7,
-          ease: 'Sine.easeOut',
-          onComplete: () => {
-            // Fade out
-            this.tweens.add({
-              targets: floatingHeart,
-              alpha: 0,
-              y: heartY - 80,
-              duration: lookDuration * 0.3,
-              ease: 'Sine.easeIn',
-              onComplete: () => {
-                floatingHeart.destroy();
-                this.isAnimating = false;
-                this.dialogueIndex++;
-                this.processDialogue();
-              }
-            });
-          }
-        });
-        break;
-
-      case 'pause-before-exit':
-        // Brief stop before exiting - characters stop walking
-        const exitPauseDuration = dialogue.duration || 600;
-        this.enea.stop();
-        this.enea.setFrame(0);
-        this.elora.stop();
-        this.elora.setFrame(0);
-
-        this.time.delayedCall(exitPauseDuration, () => {
-          this.isAnimating = false;
-          this.dialogueIndex++;
-          this.processDialogue();
-        });
-        break;
-
-      case 'walk-together-right':
-        // Both face right and walk together
-        // Keep characters mostly stationary, scroll background to create movement illusion
-        this.enea.setFlipX(true); // Flip to face right
-        this.elora.setFlipX(true); // Flip to face right
-        this.enea.play('male-walk');
-        this.elora.play('female-walk');
-
-        // Position characters in center of screen (they "walk in place" while world moves)
-        this.enea.setPosition(this.width * 0.55, this.groundY);
-        this.elora.setPosition(this.width * 0.45, this.groundY);
-
-        // Scroll background to create walking illusion (slower, more comfortable)
-        this.tweens.add({
-          targets: { val: 0 },
-          val: 1,
-          duration: 3000,
-          onUpdate: () => {
-            this.bgLayers.forEach(layer => {
-              layer.sprite.tilePositionX += layer.speed * 2;
-            });
-          },
-          onComplete: () => {
-            this.enea.stop();
-            this.enea.setFrame(0);
-            this.elora.stop();
-            this.elora.setFrame(0);
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'exit-right':
-        // Both walk and exit to the right
-        // Sprites naturally face LEFT, so flip to face RIGHT
-        this.enea.setFlipX(true);
-        this.elora.setFlipX(true);
-        this.enea.play('male-walk');
-        this.elora.play('female-walk');
-
-        // Continue scrolling background (slower, more comfortable)
-        this.tweens.add({
-          targets: { val: 0 },
-          val: 1,
-          duration: 2500,
-          onUpdate: () => {
-            this.bgLayers.forEach(layer => {
-              layer.sprite.tilePositionX += layer.speed * 1.5;
-            });
-          }
-        });
-
-        this.tweens.add({
-          targets: [this.enea, this.elora],
-          x: this.width + 150,
-          duration: 2500,
-          ease: 'Linear',
-          onComplete: () => {
-            this.enea.stop();
-            this.elora.stop();
-            this.enea.setVisible(false);
-            this.elora.setVisible(false);
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'next-episode':
-        // Handle unlock before advancing (same as photo action)
-        const currentEp = EPISODES[this.currentEpisode];
-        if (currentEp.unlock === 'elora') this.hasElora = true;
-        if (currentEp.unlock === 'dog') this.hasDog = true;
-        if (currentEp.unlock === 'baby') this.hasBaby = true;
-
-        // Skip to next episode without photo
-        this.currentEpisode++;
-        if (this.currentEpisode < EPISODES.length) {
-          this.cameras.main.fadeOut(500, 0, 0, 0);
-          this.time.delayedCall(500, () => {
-            this.cameras.main.fadeIn(500, 0, 0, 0);
-            this.startEpisode();
-          });
-        }
-        break;
-
-      case 'elora-enter':
-        // Elora enters from RIGHT, walks LEFT
-        this.hasElora = true;
-        this.elora.setPosition(this.width + 100, this.groundY);
-        this.elora.setVisible(true);
-        this.elora.setFlipX(false); // Face left (natural direction)
-        this.elora.play('female-walk');
-
-        this.tweens.add({
-          targets: this.elora,
-          x: this.width * 0.55,
-          duration: 2000,
-          ease: 'Linear',
-          onComplete: () => {
-            this.elora.stop();
-            this.elora.setFrame(0);
-            this.showSpeech(dialogue.speaker, dialogue.text);
-          }
-        });
-        break;
-
-      case 'elora-alone':
-        this.elora.setPosition(this.width * 0.5, this.groundY);
-        this.elora.setVisible(true);
-        this.enea.setVisible(false);
-        this.showSpeech(dialogue.speaker, dialogue.text);
-        break;
-
-      case 'enea-alone':
-        this.enea.setPosition(this.width * 0.5, this.groundY);
-        this.enea.setVisible(true);
-        this.elora.setVisible(false);
-        this.showSpeech(dialogue.speaker, dialogue.text);
-        break;
-
-      case 'enea-enter':
-        // Enea enters from LEFT, walks RIGHT
-        this.enea.setPosition(-100, this.groundY);
-        this.enea.setVisible(true);
-        this.enea.setFlipX(true); // Flip to face right
-        this.enea.play('male-walk');
-
-        this.tweens.add({
-          targets: this.enea,
-          x: this.width * 0.4,
-          duration: 2000,
-          ease: 'Linear',
-          onComplete: () => {
-            this.enea.stop();
-            this.enea.setFrame(0);
-            this.showSpeech(dialogue.speaker, dialogue.text);
-          }
-        });
-        break;
-
-      case 'enea-arrive':
-        // Enea enters from RIGHT (e.g. drove there), walks LEFT
-        this.enea.setPosition(this.width + 100, this.groundY);
-        this.enea.setVisible(true);
-        this.enea.setFlipX(false); // Face left
-        this.enea.play('male-walk');
-        this.eneaExpectedX = this.width * 0.6;
-
-        this.tweens.add({
-          targets: this.enea,
-          x: this.width * 0.6,
-          duration: 2000,
-          ease: 'Linear',
-          onComplete: () => {
-            this.enea.stop();
-            this.enea.setFrame(0);
-            this.showSpeech(dialogue.speaker, dialogue.text);
-          }
-        });
-        break;
-
-      case 'elora-exit':
-        // Elora walks off-screen to the left, auto-advance
-        this.elora.setFlipX(false); // Face left
-        this.elora.play('female-walk');
-        this.tweens.add({
-          targets: this.elora,
-          x: -100,
-          duration: 2000,
-          ease: 'Linear',
-          onComplete: () => {
-            this.elora.stop();
-            this.elora.setVisible(false);
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'elora-appear':
-        // Elora rushes in from left (e.g. woke up, surprised)
-        this.elora.setPosition(-100, this.groundY);
-        this.elora.setVisible(true);
-        this.elora.setFlipX(true); // Face right toward Enea
-        this.elora.play('female-walk');
-        this.eloraExpectedX = this.width * 0.35;
-
-        this.tweens.add({
-          targets: this.elora,
-          x: this.width * 0.35,
-          duration: 1200,
-          ease: 'Cubic.easeOut',
-          onComplete: () => {
-            this.elora.stop();
-            this.elora.setFrame(0);
-            this.showSpeech(dialogue.speaker, dialogue.text);
-          }
-        });
-        break;
-
-      case 'journey-text': {
-        // Fade in/out a text card (e.g. "Geneva → Seattle → Leavenworth")
-        const journeyLabel = dialogue.text || '';
-        const jt = this.add.text(this.width / 2, this.height / 2, journeyLabel, {
-          fontSize: '28px',
-          fontFamily: 'Georgia, serif',
-          color: '#ffffff',
-          stroke: '#000000',
-          strokeThickness: 4,
-          align: 'center',
-        }).setOrigin(0.5).setAlpha(0).setDepth(250);
-
-        this.tweens.add({
-          targets: jt,
-          alpha: 1,
-          duration: 800,
-          hold: 2500,
-          yoyo: true,
-          onComplete: () => {
-            jt.destroy();
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-      }
-
-      case 'walk-together':
-        this.walkTogether(() => {
-          this.isAnimating = false;
-          this.dialogueIndex++;
-          this.processDialogue();
-        });
-        break;
-
-      case 'walk-together-start':
-        // Setup for walking right together
-        const walkStartEneaX = this.width * 0.3;
-        const walkStartEloraX = this.width * 0.4;
-
-        this.enea.setPosition(walkStartEneaX, this.groundY);
-        this.enea.setVisible(true);
-        this.enea.setFlipX(true); // Face right
-        this.eneaExpectedX = walkStartEneaX;
-
-        if (this.hasElora) {
-          this.elora.setPosition(walkStartEloraX, this.groundY);
-          this.elora.setVisible(true);
-          this.elora.setFlipX(true); // Face right
-          this.eloraExpectedX = walkStartEloraX;
-        }
-        if (this.hasDog) {
-          this.dog.setPosition(this.width * 0.2, this.groundY);
-          this.dog.setFlipX(true); // Face right
-          this.dog.setVisible(true);
-        }
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.processDialogue();
-        break;
-
-      case 'face-each-other':
-        // Enea on left, Elora on right, facing each other
-        const faceEneaX = this.width * 0.4;
-        const faceEloraX = this.width * 0.6;
-
-        this.enea.setPosition(faceEneaX, this.groundY);
-        this.enea.setFlipX(true); // Face right toward Elora
-        this.enea.setVisible(true);
-        this.eneaExpectedX = faceEneaX;
-
-        this.elora.setPosition(faceEloraX, this.groundY);
-        this.elora.setFlipX(false); // Face left toward Enea
-        this.elora.setVisible(true);
-        this.eloraExpectedX = faceEloraX;
-
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.processDialogue();
-        break;
-
-      case 'restaurant-scene':
-        // Kill any active tweens (e.g. walkTogether) before restaurant setup
-        this.tweens.killAll();
-        // Transition to restaurant interior
-        this.setupRestaurant();
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.processDialogue();
-        break;
-
-      case 'plane':
-        this.plane.setPosition(-100, this.height * 0.25);
-        this.plane.setVisible(true);
-
-        // Contrail: spawn fading white dots behind the plane
-        const trailTimer = this.time.addEvent({
-          delay: 60,
-          callback: () => {
-            if (!this.plane.visible) return;
-            const dot = this.add.circle(
-              this.plane.x - 35, this.plane.y,
-              2 + Math.random() * 2, 0xffffff, 0.4
-            ).setDepth(199);
-            this.tweens.add({
-              targets: dot,
-              alpha: 0,
-              scaleX: 3,
-              scaleY: 3,
-              duration: 1000,
-              onComplete: () => dot.destroy()
-            });
-          },
-          loop: true,
-        });
-
-        this.tweens.add({
-          targets: this.plane,
-          x: this.width + 100,
-          y: this.height * 0.2,
-          duration: 4000,
-          ease: 'Sine.easeInOut',
-          onComplete: () => {
-            this.plane.setVisible(false);
-            trailTimer.destroy();
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'dog-join':
-        this.hasDog = true;
-        this.dog.setPosition(this.width * 0.5, this.groundY);
-        this.dog.setVisible(true);
-        this.dog.setAlpha(0);
-
-        this.tweens.add({
-          targets: this.dog,
-          alpha: 1,
-          duration: 500,
-          onComplete: () => {
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'baby-arrive':
-        this.hasBaby = true;
-        this.baby.setPosition(this.width * 0.5, this.groundY);
-        this.baby.setVisible(true);
-        this.baby.setAlpha(0);
-        this.baby.play('baby-idle');
-
-        this.tweens.add({
-          targets: this.baby,
-          alpha: 1,
-          duration: 500,
-          onComplete: () => {
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'family-arrive':
-        this.enea.setPosition(this.width * 0.35, this.groundY);
-        this.enea.setVisible(true);
-        this.elora.setPosition(this.width * 0.45, this.groundY);
-        this.elora.setVisible(true);
-        if (this.hasDog) {
-          this.dog.setPosition(this.width * 0.25, this.groundY);
-          this.dog.setFlipX(true); // Face right
-          this.dog.setVisible(true);
-        }
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.processDialogue();
-        break;
-
-      case 'family-together':
-        // Family positioned together, facing right (ready to walk)
-        this.enea.setPosition(this.width * 0.35, this.groundY);
-        this.enea.setFlipX(true); // Face right
-        this.enea.setVisible(true);
-        this.elora.setPosition(this.width * 0.45, this.groundY);
-        this.elora.setFlipX(true); // Face right
-        this.elora.setVisible(true);
-        if (this.hasDog) {
-          this.dog.setPosition(this.width * 0.25, this.groundY);
-          this.dog.setFlipX(true); // Face right
-          this.dog.setVisible(true);
-        }
-        if (this.hasBaby) {
-          this.baby.setPosition(this.width * 0.4, this.groundY);
-          this.baby.setVisible(true);
-          this.baby.play('baby-idle');
-        }
-        this.isAnimating = false;
-        this.dialogueIndex++;
-        this.processDialogue();
-        break;
-
-      case 'wedding-setup':
-        // Wedding: Enea waits on right, Elora on left, facing each other
-        this.enea.setPosition(this.width * 0.7, this.groundY);
-        this.enea.setFlipX(false); // Face left toward Elora
-        this.enea.setVisible(true);
-        this.elora.setPosition(this.width * 0.15, this.groundY);
-        this.elora.setFlipX(true); // Face right toward Enea
-        this.elora.setVisible(true);
-        this.showSpeech(dialogue.speaker, dialogue.text);
-        break;
-
-      case 'elora-walk-aisle':
-        this.elora.play('female-walk');
-        this.tweens.add({
-          targets: this.elora,
-          x: this.width * 0.55,
-          duration: 3000,
-          ease: 'Linear',
-          onComplete: () => {
-            this.elora.play('female-idle');
-            this.enea.setPosition(this.width * 0.6, this.groundY);
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'kneel':
-        // Visual kneel effect (lower position slightly)
-        this.tweens.add({
-          targets: this.enea,
-          y: this.groundY,
-          scaleY: 2.2,
-          duration: 500,
-          onComplete: () => {
-            this.isAnimating = false;
-            this.dialogueIndex++;
-            this.processDialogue();
-          }
-        });
-        break;
-
-      case 'hearts':
-        this.createHearts();
-        this.time.delayedCall(2000, () => {
-          this.isAnimating = false;
-          this.dialogueIndex++;
-          this.processDialogue();
-        });
-        break;
-
-      case 'photo':
-        this.showPhoto();
-        break;
-
-      case 'finale':
-        this.cameras.main.fadeOut(1000, 0, 0, 0);
-        this.time.delayedCall(1000, () => {
-          this.scene.start('FinaleScene');
-        });
-        break;
+    const handler = ACTION_HANDLERS[action];
+    if (handler) {
+      handler(this, dialogue);
+    } else {
+      console.warn('Unknown action:', action);
+      this.isAnimating = false;
+      this.dialogueIndex++;
+      this.processDialogue();
     }
   }
 
@@ -1623,6 +696,15 @@ class GameScene extends Phaser.Scene {
 
   }
 
+  getDogForEpisode(episodeId) {
+    // EP05-06: Totoro (grey/brindle miniature bull terrier, small)
+    // EP07-09: Joey (black, small-mid)
+    // EP10-12: Marzipan (brown Belgian Malinois, mid-large)
+    if (episodeId <= 6) return { texture: 'dog-totoro', scale: 3 };
+    if (episodeId <= 9) return { texture: 'dog-joey', scale: 3 };
+    return { texture: 'dog-marzipan', scale: 4 };
+  }
+
   applyOutfits(outfits) {
     // Set clothing overlay textures for this episode
     if (outfits && outfits.enea && this.textures.exists(outfits.enea)) {
@@ -1727,18 +809,48 @@ class GameScene extends Phaser.Scene {
     if (this.hasElora) {
       tweens.push(this.tweens.add({
         targets: this.elora,
-        x: targetX + 80,
+        x: targetX + 150,
         duration: 2500,
         ease: 'Linear'
       }));
     }
 
     if (this.hasDog) {
-      this.dog.setFlipX(true); // Face right
+      this.dog.setFlipX(true); // Face right (walking direction)
       this.dog.play('dog-walk');
       tweens.push(this.tweens.add({
         targets: this.dog,
-        x: targetX - 80,
+        x: targetX - 60,
+        duration: 2500,
+        ease: 'Linear'
+      }));
+    }
+
+    if (this.hasCats && this.cat1.visible) {
+      this.cat1.setFlipX(true);
+      this.cat2.setFlipX(false); // cat2 is already flipped, so unflip = face right
+      this.cat1.play('cat-walk-anim');
+      this.cat2.play('cat-walk-anim');
+      tweens.push(this.tweens.add({
+        targets: this.cat1,
+        x: targetX - 100,
+        duration: 2500,
+        ease: 'Linear'
+      }));
+      tweens.push(this.tweens.add({
+        targets: this.cat2,
+        x: targetX - 140,
+        duration: 2500,
+        ease: 'Linear'
+      }));
+    }
+
+    if (this.hasHorse && this.horse.visible) {
+      this.horse.setFlipX(true);
+      this.horse.play('horse-walk');
+      tweens.push(this.tweens.add({
+        targets: this.horse,
+        x: targetX - 220,
         duration: 2500,
         ease: 'Linear'
       }));
@@ -1766,7 +878,15 @@ class GameScene extends Phaser.Scene {
       }
       if (this.hasDog) {
         this.dog.stop();
-        this.dog.setFrame(0);
+        this.dog.setFrame(8);
+      }
+      if (this.hasCats && this.cat1.visible) {
+        this.cat1.play('cat-idle-anim');
+        this.cat2.play('cat-idle-anim');
+      }
+      if (this.hasHorse && this.horse.visible) {
+        this.horse.stop();
+        this.horse.setFrame(0);
       }
       callback();
     });
@@ -1873,63 +993,24 @@ class GameScene extends Phaser.Scene {
 
   // Draw a heart shape using graphics (Phaser 3 compatible - no bezier)
   createHeartGraphic(x, y, size, color) {
-    const graphics = this.add.graphics();
-    graphics.fillStyle(color, 1);
-    // Draw heart using two circles and a triangle
-    const r = size * 0.5; // radius for the bumps
-    // Left bump
-    graphics.fillCircle(-r * 0.5, -r * 0.3, r);
-    // Right bump
-    graphics.fillCircle(r * 0.5, -r * 0.3, r);
-    // Bottom triangle
-    graphics.fillTriangle(-size, -r * 0.3, size, -r * 0.3, 0, size * 1.2);
-    graphics.setPosition(x, y);
-    return graphics;
+    // Use pixel-art heart texture instead of drawn shapes
+    const scale = size / 8; // 16px texture, so size 16 = scale 2
+    const heart = this.add.image(x, y, 'heart-pixel')
+      .setScale(scale)
+      .setOrigin(0.5, 0.5);
+    if (color && color !== 0xe57373) {
+      heart.setTint(color);
+    }
+    return heart;
   }
 
   // Draw a pixel-art airplane using Phaser Graphics (no emoji)
   createPixelPlane() {
-    const container = this.add.container(0, 0).setDepth(200);
-    const g = this.add.graphics();
-
-    // Fuselage body — rounded white cylinder
-    g.fillStyle(0xe8eef4, 1);
-    g.fillRoundedRect(-30, -7, 60, 14, 5);
-
-    // Nose cone
-    g.fillStyle(0xd0d8e0, 1);
-    g.fillTriangle(30, -6, 30, 6, 40, 0);
-
-    // Main wings — wide swept triangles
-    g.fillStyle(0xc8d4e0, 1);
-    g.fillTriangle(-4, -5, 12, -5, 2, -30);
-    g.fillTriangle(-4, 5, 12, 5, 2, 30);
-
-    // Tail vertical stabilizer
-    g.fillStyle(0xb0c0d0, 1);
-    g.fillTriangle(-28, -5, -20, -5, -28, -22);
-
-    // Tail horizontal stabilizers
-    g.fillStyle(0xc0ccd8, 1);
-    g.fillTriangle(-28, -3, -18, -3, -28, -12);
-    g.fillTriangle(-28, 3, -18, 3, -28, 12);
-
-    // Passenger windows — row of small blue dots
-    g.fillStyle(0x6699cc, 0.9);
-    for (let wx = -16; wx <= 20; wx += 6) {
-      g.fillCircle(wx, -2, 1.5);
-    }
-
-    // Cockpit window
-    g.fillStyle(0x88bbee, 1);
-    g.fillCircle(28, -1, 3);
-
-    // Red accent stripe along fuselage
-    g.lineStyle(1, 0xcc4444, 0.6);
-    g.lineBetween(-28, 2, 28, 2);
-
-    container.add(g);
-    return container;
+    // Pixel-art plane from canvas texture — matches game's pixel aesthetic
+    const plane = this.add.image(0, 0, 'plane-pixel')
+      .setDepth(200)
+      .setScale(4);
+    return plane;
   }
 
   createBlushEffect() {
@@ -1995,19 +1076,14 @@ class GameScene extends Phaser.Scene {
   createHeartFlutterEffect() {
     // Small hearts floating near Enea (for his internal monologue)
     const eneaX = this.enea.x > 100 ? this.enea.x : (this.eneaExpectedX || this.width * 0.7);
-    const heartEffects = [];
 
     for (let i = 0; i < 3; i++) {
-      const heart = this.createHeartGraphic(
-        eneaX - 30 + i * 20,
+      const heart = this.add.image(
+        eneaX - 20 + i * 18,
         this.groundY - 120 - i * 15,
-        10,
-        0xe57373
-      );
-      heart.setAlpha(0).setDepth(150);
-      heartEffects.push(heart);
+        'heart-pixel'
+      ).setScale(0.8 + i * 0.2).setAlpha(0).setDepth(150);
 
-      // Staggered fade in and float up
       this.tweens.add({
         targets: heart,
         alpha: 0.8,
@@ -2128,21 +1204,41 @@ class GameScene extends Phaser.Scene {
   }
 
   createHearts() {
-    for (let i = 0; i < 15; i++) {
-      const startX = this.width * 0.3 + Math.random() * this.width * 0.4;
-      const startY = this.height * 0.5 + Math.random() * 100;
-      const size = 12 + Math.random() * 8; // Random size between 12-20
+    const colors = [0xe57373, 0xef5350, 0xf48fb1, 0xff8a80, 0xce93d8];
+    const centerX = (this.enea.x + this.elora.x) / 2 || this.width * 0.5;
 
-      const heart = this.createHeartGraphic(startX, startY, size, 0xe57373);
-      heart.setDepth(200);
+    for (let i = 0; i < 20; i++) {
+      const startX = centerX - 120 + Math.random() * 240;
+      const startY = this.groundY - 40 + Math.random() * 40;
+      const scale = 1.2 + Math.random() * 1.8;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const heart = this.add.image(startX, startY, 'heart-pixel')
+        .setScale(0.1)
+        .setDepth(200)
+        .setAlpha(0.9)
+        .setTint(color);
+
+      // Staggered pop-in, float up with gentle sway, then fade
+      const delay = i * 80;
+      const swayDir = Math.random() > 0.5 ? 1 : -1;
 
       this.tweens.add({
         targets: heart,
-        y: startY - 200 - Math.random() * 100,
+        scale: scale,
+        duration: 300,
+        delay: delay,
+        ease: 'Back.easeOut',
+      });
+
+      this.tweens.add({
+        targets: heart,
+        y: startY - 180 - Math.random() * 120,
+        x: startX + swayDir * (20 + Math.random() * 40),
         alpha: 0,
-        scale: 1.5,
-        duration: 1500 + Math.random() * 500,
-        ease: 'Sine.easeOut',
+        duration: 1600 + Math.random() * 600,
+        delay: delay + 200,
+        ease: 'Sine.easeIn',
         onComplete: () => heart.destroy()
       });
     }
@@ -2164,8 +1260,10 @@ class GameScene extends Phaser.Scene {
 
       // Show/hide navigation based on photo count
       const hasMultiple = this.currentPhotos.length > 1;
-      this.prevPhotoBtn.setVisible(false); // Always hidden on first photo
-      this.nextPhotoBtn.setVisible(hasMultiple); // Show only if more photos ahead
+      this.prevPhotoBtn.setVisible(false);
+      this.prevPhotoBtn.disableInteractive();
+      this.nextPhotoBtn.setVisible(hasMultiple);
+      if (hasMultiple) this.nextPhotoBtn.setInteractive(); else this.nextPhotoBtn.disableInteractive();
       this.photoCounter.setVisible(hasMultiple);
     } else {
       // No photos - show icon instead
@@ -2173,7 +1271,9 @@ class GameScene extends Phaser.Scene {
       this.photoIcon.setText(episode.icon);
       this.photoIcon.setVisible(true);
       this.prevPhotoBtn.setVisible(false);
+      this.prevPhotoBtn.disableInteractive();
       this.nextPhotoBtn.setVisible(false);
+      this.nextPhotoBtn.disableInteractive();
       this.photoCounter.setVisible(false);
       if (this.photoImage) {
         this.photoImage.destroy();
@@ -2227,10 +1327,14 @@ class GameScene extends Phaser.Scene {
     // Update counter
     this.photoCounter.setText(`${this.currentPhotoIndex + 1} / ${this.currentPhotos.length}`);
 
-    // Show/hide arrows based on position in slideshow
+    // Show/hide arrows based on position in slideshow — also toggle interactivity
     if (this.currentPhotos.length > 1) {
-      this.prevPhotoBtn.setVisible(this.currentPhotoIndex > 0);
-      this.nextPhotoBtn.setVisible(this.currentPhotoIndex < this.currentPhotos.length - 1);
+      const showPrev = this.currentPhotoIndex > 0;
+      const showNext = this.currentPhotoIndex < this.currentPhotos.length - 1;
+      this.prevPhotoBtn.setVisible(showPrev);
+      this.nextPhotoBtn.setVisible(showNext);
+      if (showPrev) this.prevPhotoBtn.setInteractive(); else this.prevPhotoBtn.disableInteractive();
+      if (showNext) this.nextPhotoBtn.setInteractive(); else this.nextPhotoBtn.disableInteractive();
     }
   }
 
@@ -2289,19 +1393,11 @@ class GameScene extends Phaser.Scene {
   }
 
   handleInput() {
-    // If photo overlay is showing, navigate through photos or close
+    // If photo overlay is showing, only arrow buttons navigate — ignore general clicks
     if (this.photoOverlay.visible) {
-      // If a button handler already processed this click, skip
       if (this._photoClickHandled) {
         this._photoClickHandled = false;
-        return;
       }
-      // Global clicks advance through photos but NEVER close the overlay
-      // Only the Continue button closes
-      if (this.currentPhotos.length > 1 && this.currentPhotoIndex < this.currentPhotos.length - 1) {
-        this.showNextPhoto();
-      }
-      // On last photo, do nothing — user must click Continue
       return;
     }
 
@@ -2434,7 +1530,7 @@ class GameScene extends Phaser.Scene {
       ];
       // Dog/Baby if visible
       if (this.dog && this.dog.visible) {
-        lines.push(`Dog:   vis=true pos=(${Math.round(this.dog.x)},${Math.round(this.dog.y)}) sc=${this.dog.scale.toFixed(1)}`);
+        lines.push(`Dog:   vis=true pos=(${Math.round(this.dog.x)},${Math.round(this.dog.y)}) sc=${this.dog.scale.toFixed(1)} dp=${this.dog.depth}`);
       }
       if (this.baby && this.baby.visible) {
         lines.push(`Baby:  vis=true pos=(${Math.round(this.baby.x)},${Math.round(this.baby.y)}) sc=${this.baby.scale.toFixed(1)}`);
@@ -2454,142 +1550,6 @@ class GameScene extends Phaser.Scene {
     }
   }
 }
-
-// ============================================================
-// FINALE SCENE - Valentine's message
-// ============================================================
-class FinaleScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'FinaleScene' });
-  }
-
-  create() {
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
-    // Gradient background
-    const graphics = this.add.graphics();
-    graphics.fillGradientStyle(0xff9a9e, 0xff9a9e, 0xfecfef, 0xfdfbfb, 1);
-    graphics.fillRect(0, 0, width, height);
-
-    // Floating hearts (drawn graphics)
-    for (let i = 0; i < 3; i++) {
-      const heartX = width / 2 - 80 + i * 80;
-      const heartY = 80;
-      const heart = this.createHeart(heartX, heartY, 24, 0xe57373);
-
-      this.tweens.add({
-        targets: heart,
-        y: heartY - 15,
-        duration: 1500,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        delay: i * 200
-      });
-    }
-
-    // Title
-    this.add.text(width / 2, 170, "Happy Valentine's Day", {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '52px',
-      color: '#c94c4c'
-    }).setOrigin(0.5);
-
-    // Her name
-    this.add.text(width / 2, 230, 'Elora', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '42px',
-      color: '#e57373',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-
-    // Message
-    const messages = [
-      "From a dead phone in Madrid to a baby boy in Seattle.",
-      "From thigh-high boots to 3am feedings.",
-      "You took a chance on a guy from Tinder,",
-      "and I've spent every day since trying to deserve you.",
-      "",
-      "Eight years, twelve places, three countries,",
-      "and one perfect little family.",
-      "",
-      "Thank you for choosing me, for choosing us,",
-      "for building this beautiful life together.",
-      "",
-      "I love you more than words.",
-      "",
-      "Ti amo per sempre."
-    ];
-
-    let yPos = 300;
-    messages.forEach((msg, i) => {
-      const isItalian = msg.includes('Ti amo');
-      this.add.text(width / 2, yPos, msg, {
-        fontFamily: 'Cormorant Garamond',
-        fontSize: isItalian ? '22px' : '18px',
-        color: isItalian ? '#c94c4c' : '#4a3f3f',
-        fontStyle: 'italic',
-        align: 'center'
-      }).setOrigin(0.5);
-      yPos += msg === '' ? 15 : 28;
-    });
-
-    // Signature
-    this.add.text(width / 2, height - 120, 'With all my love,', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '18px',
-      color: '#4a3f3f'
-    }).setOrigin(0.5);
-
-    this.add.text(width / 2, height - 85, 'Enea', {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: '28px',
-      color: '#c94c4c',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-
-    // Restart button
-    const button = this.add.rectangle(width / 2, height - 35, 200, 40, 0x000000, 0)
-      .setStrokeStyle(2, 0xc94c4c)
-      .setInteractive({ useHandCursor: true });
-
-    this.add.text(width / 2, height - 35, 'Relive Our Journey', {
-      fontFamily: 'Lato',
-      fontSize: '14px',
-      color: '#c94c4c'
-    }).setOrigin(0.5);
-
-    button.on('pointerdown', () => {
-      this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.time.delayedCall(500, () => {
-        this.scene.start('GameScene', { episode: 0 });
-      });
-    });
-
-    button.on('pointerover', () => button.setFillStyle(0xc94c4c, 0.1));
-    button.on('pointerout', () => button.setFillStyle(0x000000, 0));
-
-    // Fade in
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
-  }
-
-  createHeart(x, y, size, color) {
-    const graphics = this.add.graphics();
-    graphics.fillStyle(color, 1);
-    // Draw heart using two circles and a triangle (Phaser 3 compatible)
-    const r = size * 0.5; // radius for the bumps
-    // Left bump
-    graphics.fillCircle(-r * 0.5, -r * 0.3, r);
-    // Right bump
-    graphics.fillCircle(r * 0.5, -r * 0.3, r);
-    // Bottom triangle
-    graphics.fillTriangle(-size, -r * 0.3, size, -r * 0.3, 0, size * 1.2);
-    graphics.setPosition(x, y);
-    return graphics;
-  }
-}
-
 // Game Configuration
 const config = {
   type: Phaser.AUTO,

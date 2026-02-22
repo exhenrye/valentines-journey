@@ -4,28 +4,34 @@ const episode = {
   date: 'October 2018',
   background: 'christmas-night',
   icon: '\u2708\uFE0F',
-  outfits: { eneaShirt: 'male-shirt-green', eneaPants: 'male-pants-blue', eneaBoots: 'male-boots', eneaHat: 'male-santa-hat', elora: 'female-bodice-purple', eloraHat: 'female-santa-hat' },
+  outfits: { eneaShirt: 'male-shirt-purple', eneaPants: 'male-pants-brown', eneaBoots: 'male-boots', eneaHat: 'male-purple-cap', elora: 'female-bodice-purple', eloraHat: 'female-red-cap' },
   caption: 'We were an ocean apart. On our anniversary, I surprised you\u2014flew across the world just to see your face. Every mile was worth it.',
+  photos: [
+    'assets/photos/03-leavenworth/IMG_4616.PNG',
+    'assets/photos/03-leavenworth/951FCC65-C271-46C8-BCF1-1A8483434D31.jpg',
+    'assets/photos/03-leavenworth/IMG_4673.jpeg',
+    'assets/photos/03-leavenworth/IMG_4732.jpeg',
+    'assets/photos/03-leavenworth/IMG_4743.JPG',
+    'assets/photos/03-leavenworth/Links003.JPG',
+    'assets/photos/03-leavenworth/IMG_4761.JPG',
+  ],
   dialogue: [
-    // Scene 1: Elora alone on their anniversary
     { speaker: 'elora', text: 'I miss him so much today...', action: 'elora-alone' },
-    { speaker: 'elora', text: 'Happy anniversary to us... an ocean apart.' },
-    { speaker: 'elora', text: 'He\'s so far away right now...' },
-    { action: 'elora-exit' },
-
-    // Scene 2: The Journey
+    { speaker: 'elora', text: 'An ocean apart on our anniversary. This town is beautiful, but it feels empty without him.' },
     { action: 'plane' },
-    { action: 'journey-text', text: 'Geneva \u2192 Seattle \u2192 Leavenworth' },
-
-    // Scene 3: Enea arrives
-    { speaker: 'enea', text: 'She has no idea I\'m here.', action: 'enea-arrive' },
-    { speaker: 'enea', text: 'I drove for hours through the mountains. Worth every mile.' },
-
-    // Scene 4: The Surprise
-    { speaker: 'elora', text: 'ENEA?! What\u2014 How are you HERE?!', action: 'elora-appear' },
-    { speaker: 'enea', text: 'Surprise, amore. Happy anniversary.' },
-    { speaker: 'elora', text: 'You flew across the world... for me?', effect: 'blush' },
-    { speaker: 'enea', text: 'I\'d fly anywhere for you. Every single time.' },
+    { action: 'pause-beat', duration: 1200 },
+    { speaker: 'enea', text: 'Surprise, amore.', action: 'enea-enter-right' },
+    { speaker: 'elora', text: 'ENEA?! You flew all this way?!' },
+    { speaker: 'enea', text: 'I\'d fly anywhere for you. Happy anniversary.' },
+    { action: 'embrace' },
+    { speaker: 'elora', text: 'I can\'t believe you\'re really here. I thought I was dreaming.' },
+    { speaker: 'enea', text: 'You\'ll never be alone on our anniversary. Not while planes exist.' },
+    { action: 'look-at-each-other', duration: 1200 },
+    { speaker: 'elora', text: 'Look at this place... it\'s like a Christmas village came to life.' },
+    { speaker: 'enea', text: 'It\'s perfect. But honestly, I\'d be happy anywhere as long as you\'re next to me.' },
+    { action: 'walk-together' },
+    { speaker: 'elora', text: 'The lights, the snow on the mountains... and you\'re here. This is the best anniversary ever.' },
+    { speaker: 'enea', text: 'Every mile, every airport, every terrible plane meal\u2014worth it for that smile.' },
     { action: 'hearts' },
     { action: 'photo' },
   ],

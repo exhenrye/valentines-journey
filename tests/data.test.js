@@ -37,8 +37,8 @@ describe('EPISODES Data Integrity', () => {
 });
 
 describe('BACKGROUNDS Data Integrity', () => {
-  test('should have 8 background configurations', () => {
-    expect(Object.keys(BACKGROUNDS).length).toBe(8);
+  test('should have 10 background configurations', () => {
+    expect(Object.keys(BACKGROUNDS).length).toBe(10);
   });
 
   test('all backgrounds should have layers array', () => {

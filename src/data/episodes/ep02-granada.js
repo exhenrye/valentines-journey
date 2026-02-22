@@ -1,0 +1,37 @@
+const episode = {
+  id: 2,
+  name: 'Granada',
+  date: 'December 21-23, 2017',
+  background: 'town-sunset',
+  icon: '\u{1F3F0}',
+  outfits: { enea: 'male-split-hose', eneaHat: 'male-blue-cap', elora: 'female-bodice-orange' },
+  caption: 'Our first real adventure together. Wandering the Alhambra, getting lost in narrow streets, realizing I never wanted to travel without you again.',
+  photos: [
+    'assets/photos/02-granada/kiss-selfie.jpg',
+    'assets/photos/02-granada/couple-selfie.jpg',
+    'assets/photos/02-granada/alhambra.jpg',
+    'assets/photos/02-granada/elora-posing.jpg',
+  ],
+  dialogue: [
+    { action: 'walk-together-start' },
+    { speaker: 'elora', text: 'I can\'t believe we\'re actually here! The Alhambra!' },
+    { speaker: 'enea', text: 'Worth every minute of that drive.' },
+    { action: 'walk-together' },
+    { action: 'pause-beat', duration: 600 },
+    { speaker: 'elora', text: 'Wait! I need to vlog this! Hold on...' },
+    { speaker: 'enea', text: 'I hate selfie sticks... but watching her this happy? I\'d hold a hundred of them.', effect: 'heart-flutter' },
+    { speaker: 'elora', text: 'And THIS is the famous Alhambra! Look at those arches!' },
+    { action: 'walk-together' },
+    { action: 'restaurant-scene' },
+    { speaker: 'enea', text: 'This restaurant is incredible. Very fancy.' },
+    { speaker: 'elora', text: 'Oh no! My napkin... and the fork... I\'m so sorry!', effect: 'embarrassed' },
+    { speaker: 'enea', text: 'Hey... you\'re the most elegant woman in here. Even when you\'re juggling silverware.' },
+    { speaker: 'elora', text: 'You always know what to say.', effect: 'blush' },
+    { action: 'look-at-each-other', duration: 1000 },
+    { speaker: 'elora', text: 'Promise me we\'ll always travel together.' },
+    { speaker: 'enea', text: 'Always. Every adventure, every road trip, every awkward dinner... with you.' },
+    { action: 'photo' },
+  ],
+};
+
+export default episode;
