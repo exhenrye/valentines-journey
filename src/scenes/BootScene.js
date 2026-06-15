@@ -112,7 +112,7 @@ class BootScene extends Phaser.Scene {
     this.load.image('purple3', 'assets/backgrounds/sunset-purple/03_WaterPurple.png');
     this.load.image('purple4', 'assets/backgrounds/sunset-purple/04_PalmsPurple.png');
 
-    // Load dog sprite sheets (3 variants for story timeline)
+    // Load dog sprite sheets (3 variants for story timeline, 8 cols × 2 rows, 24×32 per frame)
     const dogBase = 'assets/characters/GandalfHardcore Pet companion/';
     this.load.spritesheet('dog-totoro', dogBase + 'GandalfHardcore doggy sheet 3.png', {
       frameWidth: 24, frameHeight: 32

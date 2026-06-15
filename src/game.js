@@ -393,6 +393,7 @@ const config = {
   parent: 'game-container',
   width: 1280,
   height: 720,
+  pixelArt: true,
   backgroundColor: '#0a0a0a',
   scale: {
     mode: Phaser.Scale.FIT,

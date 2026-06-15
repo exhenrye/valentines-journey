@@ -96,6 +96,7 @@ export function plane(scene, dialogue) {
 export function dogJoin(scene, dialogue) {
   scene.hasDog = true;
   scene.dog.setPosition(scene.width * 0.5, scene.dogGroundY);
+  scene.dog.setFlipX(false); // Dog sprite naturally faces right — no flip needed
   scene.dog.setVisible(true);
   scene.dog.setAlpha(0);
 

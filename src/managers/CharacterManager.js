@@ -71,7 +71,7 @@ export default class CharacterManager {
     // Dog sprite (changes texture per episode: Totoro/Joey/Marzipan)
     this.dog = scene.add.sprite(width * 0.2, this.dogGroundY, 'dog-totoro')
       .setScale(3).setOrigin(0.5, 1).setDepth(100).setVisible(false);
-    this.dog.setFrame(8);
+    this.dog.setFrame(0);
 
     // Baby sprite (Elthen pack - hidden initially, shown in EP11)
     this.baby = scene.add.sprite(width * 0.5, this.groundY, 'baby')
@@ -216,7 +216,7 @@ export default class CharacterManager {
     this.dog.setVisible(false);
     this.dog.setPosition(width * 0.2, this.dogGroundY);
     this.dog.stop();
-    this.dog.setFrame(8);
+    this.dog.setFrame(0);
 
     this.baby.setVisible(false);
     this.baby.stop();
@@ -324,7 +324,7 @@ export default class CharacterManager {
     }
 
     if (this.hasDog) {
-      this.dog.setFlipX(true);
+      this.dog.setFlipX(false);
       this.dog.play('dog-walk');
       tweens.push(scene.tweens.add({
         targets: this.dog,
@@ -384,7 +384,7 @@ export default class CharacterManager {
       }
       if (this.hasDog) {
         this.dog.stop();
-        this.dog.setFrame(8);
+        this.dog.setFrame(0);
       }
       if (this.hasCats && this.cat1.visible) {
         this.cat1.play('cat-idle-anim');

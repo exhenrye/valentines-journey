@@ -91,7 +91,7 @@ export function walkTogetherStart(scene, dialogue) {
   }
   if (scene.hasDog) {
     scene.dog.setPosition(scene.width * 0.22, scene.dogGroundY);
-    scene.dog.setFlipX(true); // Face right (walking direction)
+    scene.dog.setFlipX(false);
     scene.dog.setVisible(true);
   }
   if (scene.hasCats) {

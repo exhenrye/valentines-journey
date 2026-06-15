@@ -132,7 +132,7 @@ export function familyArrive(scene, dialogue) {
   scene.eloraExpectedX = scene.width * 0.5;
   if (scene.hasDog) {
     scene.dog.setPosition(scene.width * 0.2, scene.dogGroundY);
-    scene.dog.setFlipX(true);
+    scene.dog.setFlipX(false);
     scene.dog.setVisible(true);
   }
   if (scene.hasCats) {
@@ -268,7 +268,7 @@ export function familyTogether(scene, dialogue) {
   scene.eloraExpectedX = scene.width * 0.5;
   if (scene.hasDog) {
     scene.dog.setPosition(scene.width * 0.2, scene.dogGroundY);
-    scene.dog.setFlipX(true);
+    scene.dog.setFlipX(false);
     scene.dog.setVisible(true);
   }
   if (scene.hasBaby) {
